@@ -21,7 +21,6 @@ add_compile_options("-ftrapv")
 
 # Makes a bunch of things r/o so it is harder to exploit
 add_link_options("-Wl,-z,relro,-z,now")
-find_package(c3-nu REQUIRED)
 
 include_directories(include)
 

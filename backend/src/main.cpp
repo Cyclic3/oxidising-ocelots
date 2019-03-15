@@ -7,6 +7,5 @@ int main() {
             { 69, "yeet" },
             { 420, "hax0r" }
           });
-
   return 0;
 }

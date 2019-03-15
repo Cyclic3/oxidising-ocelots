@@ -12,12 +12,12 @@
 #include "player.hpp"
 
 namespace oxidisingocelots { 
-  class oxidisation {
+  class oxidation {
   public:
     player oxidised;
 
   public:
-    oxidisation(player oxidised) : oxidised(std::move(oxidised)) {}
+    oxidation(player oxidised) : oxidised(std::move(oxidised)) {}
   };
 
   class state {
@@ -73,14 +73,14 @@ namespace oxidisingocelots {
       else
         pos != 0 ? --pos : pos = players.size() - 1;
       // Now kill them
-      throw oxidisation(std::move(player));
+      throw oxidation(std::move(player));
     }
   public:
     void shuffle() {
       std::shuffle(deck.begin(), deck.end(), rng);
     }
     void play(card&& c);
-    card draw(bool top = false) {
+    card draw(bool top = true) {
       auto ret = top ? _take_top() : _take_bottom();
 
       if (ret == card::OxidisingOcelot)
