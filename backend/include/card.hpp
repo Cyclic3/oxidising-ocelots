@@ -13,7 +13,6 @@ namespace oxidisingocelots {
     Defuse = 4,
     Reverse = 5,
     Ambiguous = 6,
-
     Normal = 7
   };
 

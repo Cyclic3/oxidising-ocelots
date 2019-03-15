@@ -11,38 +11,84 @@
 #include "card.hpp"
 #include "player.hpp"
 
-namespace oxidisingocelots {
+namespace oxidisingocelots { 
+  class oxidisation {
+  public:
+    player oxidised;
+
+  public:
+    oxidisation(player oxidised) : oxidised(std::move(oxidised)) {}
+  };
+
   class state {
   private:
     std::deque<card> deck;
-    std::map<player_id, player> players;
+    std::vector<player> players;
+    bool is_forward = true;
+    uint pos = 0;
+    uint goes_left = 1;
 
   public:
     static std::random_device rng;
 
-  public:
-    void shuffle() {
-      std::shuffle(deck.begin(), deck.end(), rng);
-    }
-    card take_top() {
+  private:
+    card _take_top() {
       auto ret = deck.front();
       deck.pop_front();
       return ret;
     }
-    card take_bottom() {
+    card _take_bottom() {
       auto ret = deck.back();
       deck.pop_back();
       return ret;
     }
-    void push_front(card&& c, size_t dist) {
+    void _push_front(card&& c, size_t dist) {
       if (dist > deck.size())
         throw std::runtime_error("Bad deck position");
       deck.emplace(deck.begin() + dist, std::move(c));
     }
-    void push_back(card&& c, size_t dist) {
+    void _push_back(card&& c, size_t dist) {
       if (dist > deck.size())
         throw std::runtime_error("Bad deck position");
       deck.emplace(deck.end() - dist, std::move(c));
+    }
+    void next_player() {
+      if (is_forward)
+        ++pos %= players.size();
+      else {
+        if (pos == 0)
+          pos = players.size() - 1;
+        else
+          --pos;
+      }
+      goes_left = 1;
+    }
+    void _oxidise() {
+      // Steal the player
+      auto player = std::move(players[pos]);
+      players.erase(players.begin() + pos);
+      // Now we fix the array
+      if (is_forward)
+        pos %= players.size();
+      else
+        pos != 0 ? --pos : pos = players.size() - 1;
+      // Now kill them
+      throw oxidisation(std::move(player));
+    }
+  public:
+    void shuffle() {
+      std::shuffle(deck.begin(), deck.end(), rng);
+    }
+    void play(card&& c);
+    card draw(bool top = false) {
+      auto ret = top ? _take_top() : _take_bottom();
+
+      if (ret == card::OxidisingOcelot)
+        _oxidise();
+      else if (--goes_left == 0)
+        next_player();
+
+      return ret;
     }
 
   public:
@@ -57,14 +103,12 @@ namespace oxidisingocelots {
       // Then we act on the players
       for (auto& i : _players) {
         // Add the player
-        if (auto player_res = players.emplace(i.id, i); player_res.second) {
-          auto& player = player_res.first->second;
-          // Deal the defuse
-          player.pick_up(card::Defuse);
-          // Deal n unforced cards
-          for (auto i = 0; i < _n_dealt_cards; ++i)
-            player.pick_up(take_top());
-        }
+        auto& player = players.emplace_back(i);
+        // Deal the defuse
+        player.pick_up(card::Defuse);
+        // Deal n unforced cards
+        for (auto i = 0; i < _n_dealt_cards; ++i)
+          player.pick_up(_take_top());
       }
 
       // Then add in the ocelots and the defuses
