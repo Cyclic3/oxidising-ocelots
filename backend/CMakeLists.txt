@@ -16,8 +16,8 @@ add_compile_options("-D_FORTIFY_SOURCE=2")
 add_compile_options("-fstack-protector-strong")
 # Signed o/f protection
 add_compile_options("-ftrapv")
-# Makes a buch of things r/o
-#add_compile_options("-Wl,-z,relro,-z,now")
+
+find_package(c3-nu REQUIRED)
 
 # Makes a bunch of things r/o so it is harder to exploit
 add_link_options("-Wl,-z,relro,-z,now")
@@ -28,4 +28,4 @@ file(GLOB_RECURSE source src/*.cpp)
 
 add_executable(${PROJECT_NAME} ${source})
 
-target_link_libraries(${PROJECT_NAME} ${BOTAN_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${PROJECT_NAME} ${BOTAN_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} c3-nu)

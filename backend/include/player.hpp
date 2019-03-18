@@ -6,19 +6,18 @@
 #include "card.hpp"
 
 namespace oxidisingocelots {
-
   using player_id = uint32_t;
 
   class player {
   public:
     player_id id;
     std::multiset<card> hand = {};
-    std::multiset<card> public_hand = {};
+    std::multiset<card> revealed_hand = {};
 
   private:
     card _take_random_card();
     inline void _reveal_card(card&& c) {
-      public_hand.emplace(std::move(c));
+      revealed_hand.emplace(std::move(c));
     }
     void _oxidise();
 
