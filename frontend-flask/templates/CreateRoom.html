@@ -1,0 +1,33 @@
+<!-- calling template -->
+{% extends "Layout/layout.html" %}
+
+
+{% block _content_ %}
+<h3>Generate room</h3>
+
+    <section class="media content-section">
+        <div class="media-body">
+            <div class="section-metadata">
+                <a class="links" ></a>
+                <small class="text-muted"></small>
+            </div>
+            <form method="POST" action="">
+                <fieldset class="form-group">
+                    <div class="form">
+                        
+                        <div class="col-md-7 mb-1">
+                            <label for="roomName">Enter Room Name:</label>
+                            <input type="text" class="form-control" id="roomName" name="roomName" placeholder="John's Game Room" required>
+                        </div>
+                        <div class="border-top"></div>
+                        <div class="form" style="padding-top: 20px">
+                            <div class="col-md-auto mb-3">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </section>
+{% endblock _content_ %}
