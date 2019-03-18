@@ -82,7 +82,7 @@
 					<h3>Active Rooms</h3>
 						<ul class="list-group">
 							{% for room in userData[2] %}
-								<a class='sidebaritem' href=""><li class="list-group-item list-group-item-light">{{room.roomName}}</li></a>
+								<a class='sidebaritem' href=""><li class="list-group-item list-group-item-light">{{room[0]}}, {{room[1]}}, {{room[2]}} players</li></a>
 							{% endfor %}
 						</ul>
 				</div>		

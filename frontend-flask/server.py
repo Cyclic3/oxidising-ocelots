@@ -55,13 +55,13 @@ def GetMeANewID():
 def create_room_page():
 	userData = (request.cookies.get('username'), sanitiseInput(request.cookies.get('userID')), listRooms())
 
-	if not request.remote_addr.startswith('127'):
+	if not (request.remote_addr.startswith('127') or request.remote_addr == '::1'):
 		abort(403)
 
 	if request.method == 'GET':
 		return (render_template("CreateRoom.html", userData = userData))
 	elif request.method == 'POST':
-		game_room(request.form['roomName'])
+		game_room(sanitiseInput(request.form['roomName']))
 		flash("Room has been created", 'success')
 		return redirect(url_for('home'))
 
@@ -90,7 +90,7 @@ def listRooms():
 class game_room:
 	def __init__(self, roomName):
 		self.roomName = roomName
-		self.roomID = generateID(0xFFFFFF)
+		self.roomID = generateID(0xFFFFFFFF)
 		self.roomUsers = []
 		self.activeGame = False
 		self.AddToActiveRooms()
