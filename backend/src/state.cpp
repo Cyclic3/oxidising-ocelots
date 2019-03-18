@@ -1,8 +1,6 @@
 #include "state_machine.hpp"
 
 namespace oxidisingocelots {
-  std::random_device state::rng{};
-
   void state::play(card&& c) {
     switch (c) {
       case (card::Skip): next_player(); break;

@@ -13,7 +13,8 @@ namespace oxidisingocelots {
     Defuse = 4,
     Reverse = 5,
     Ambiguous = 6,
-    Normal = 7
+    Normal = 7,
+    Mark = 8
   };
 
   extern std::map<card, std::string> card_names;

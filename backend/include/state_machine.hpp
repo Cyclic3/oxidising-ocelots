@@ -4,22 +4,13 @@
 #include <vector>
 #include <map>
 #include <set>
-#include <random>
 #include <algorithm>
 #include <array>
 
 #include "card.hpp"
 #include "player.hpp"
 
-namespace oxidisingocelots { 
-  class oxidation {
-  public:
-    player oxidised;
-
-  public:
-    oxidation(player oxidised) : oxidised(std::move(oxidised)) {}
-  };
-
+namespace oxidisingocelots {
   class state {
   private:
     std::deque<card> deck;
@@ -29,8 +20,7 @@ namespace oxidisingocelots {
     uint goes_left = 1;
 
   public:
-    static std::random_device rng;
-
+    player& current_player() { return players[pos]; }
   private:
     card _take_top() {
       auto ret = deck.front();
@@ -64,8 +54,13 @@ namespace oxidisingocelots {
       goes_left = 1;
     }
     void _oxidise() {
+      // Check if the player has a defuse, and if so, play it
+      if (current_player().defuse())
+        return;
+
+      // Otherwise, they will die
       // Steal the player
-      auto player = std::move(players[pos]);
+      auto target = std::move(current_player());
       players.erase(players.begin() + pos);
       // Now we fix the array
       if (is_forward)
@@ -73,22 +68,21 @@ namespace oxidisingocelots {
       else
         pos != 0 ? --pos : pos = players.size() - 1;
       // Now kill them
-      throw oxidation(std::move(player));
+      throw oxidation(std::move(target));
     }
   public:
-    void shuffle() {
-      std::shuffle(deck.begin(), deck.end(), rng);
-    }
+    void shuffle();
     void play(card&& c);
-    card draw(bool top = true) {
+    void draw(bool top = true) {
       auto ret = top ? _take_top() : _take_bottom();
 
       if (ret == card::OxidisingOcelot)
         _oxidise();
-      else if (--goes_left == 0)
-        next_player();
+      else
+        current_player().pick_up(std::move(ret));
 
-      return ret;
+      if (--goes_left == 0)
+        next_player();
     }
 
   public:
