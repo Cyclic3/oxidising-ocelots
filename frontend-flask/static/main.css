@@ -1,0 +1,279 @@
+ body{
+  background: #fafafa;
+  color: #333333;
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6{
+  color: #444444;
+}
+
+
+header{
+  background: white;
+  width: 100%;
+  padding: 15px 0;
+  color: white;
+  text-align: center;
+}
+
+nav ul{
+  background: #052150;
+  overflow: hidden;
+  color: white;
+  padding: auto;
+  text-align: left;
+  padding-bottom: 0px;
+  -webkit-transition: max-height 0.4s;
+  -ms-transition: max-height 0.4s;
+  -o-transition: max-height 0.4s;
+  -moz-transition: max-height 0.4s;
+  transition: max-height 0.4s;
+
+
+}
+
+nav ul li{
+  display: inline-block;
+  padding: 15px;
+}
+
+nav ul li:hover{
+  background-color: #80A0CC;
+}
+
+
+nav a{
+  text-decoration: none;
+  color: #e8f1ff;
+}
+
+nav a:hover{
+  text-decoration: none;
+  color: white;
+}
+
+ 
+li.right{
+  float: right;
+  padding-right: 25px;
+
+}
+
+li.rightlast{
+  float: right;
+  padding-right: 50px;
+}
+
+
+.ATS_title{
+  color: #052150;
+  padding-right: 150px;
+  font-family: verdana;
+  font-weight: 550;
+  font-stretch: semi-expanded;
+}
+
+
+
+.sidebaritem{
+  text-decoration: none!important;
+}
+
+.sidebaritem:hover{
+  color: black!important;
+}
+
+.content-section{
+  overflow: auto;
+  background: #ffffff;
+  padding: 10px 10px;
+  border: 1px solid #dddddd;
+  border-radius: 3px;
+  margin-bottom: 20px;
+
+}
+
+
+.links{
+  color: #80A0CC;
+  text-decoration: none;
+}
+
+a.links:hover{
+  color: #80A0CC;
+  text-decoration: none;
+}
+
+
+.section-title{
+  color: #444444;
+}
+
+a.section-title:hover{
+  color: #428bca;
+  text-decoration: none;
+}
+
+.section-content{
+  white-space: pre-line;
+}
+
+.section-img{
+  height: 65px;
+  width: 65px;
+  margin-right: 16px;
+}
+
+.section-metadata{
+  padding-bottom: 1px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #e3e3e3
+}
+
+.section-metadata-noline{
+  padding-bottom: 1px;
+  margin-bottom: 4px;
+}
+
+.section-metadata a:hover{
+  color: #333;
+  text-decoration: none;
+}
+
+.section-metadata-noline a:hover{
+  color: #333;
+  text-decoration: none;
+}
+
+.section-svg{
+  width: 25px;
+  height: 25px;
+  vertical-align: middle;
+}
+
+.account-img{
+  height: 125px;
+  width: 125px;
+  margin-right: 20px;
+  margin-bottom: 16px;
+}
+
+.account-heading{
+  font-size: 2.5rem;
+}
+
+
+.nav-handle{
+  width: 100%;
+  background: #052150;
+  text-align: left;
+  box-sizing: border-box;
+  padding: 0px;
+  padding-bottom: 0px;
+  cursor: pointer;
+  font-family: sans-serif;
+  padding-left: 50px;
+  display: none; 
+  color: #e8f1ff;
+  position:relative; bottom: 1px;
+}
+
+.nav-handle-icon {
+    display: block;
+    cursor: pointer;
+    position: relative; top: 15px;
+}
+
+.bar1, .bar2, .bar3 {
+  width: 20px;
+  height: 2px;
+  background-color: #ffffff;
+  margin: 6px 0;
+  transition: 0.4s;
+}
+
+
+.Forest-Logo{
+  max-width: 150px;
+  width: auto;
+  height: auto;
+  float: left;
+  padding-left: 50px;
+  position: relative; top: 0px;
+}
+
+.foodTable-head{
+  background-color: #052150;
+  color: white;
+}
+
+
+
+
+
+/* using media queries to adjust the site for other devices */
+@media screen and (max-width: 790px){
+  
+  nav ul{
+    max-height: 0px;
+  }
+
+  .when-showing{
+    max-height: 20em;
+  }
+
+  nav ul li{
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px;
+    overflow: auto;
+  }
+
+  .nav-handle{
+    display: inline-block;
+  }
+}
+
+
+@media screen and (max-width: 660px){
+
+  .Forest-Logo{
+    padding-left: 10px;
+    max-width: 100px;
+  }
+
+  .ATS_title{
+    padding-right: 0px;
+    text-align: center;
+  }
+}
+
+@media screen and (max-width: 470px){
+
+  .Forest-Logo{
+    max-width: 95px;    
+  }
+    .ATS_title{
+    font-size: 1.9em;
+  }
+}
+
+
+@media screen and (max-width: 360px){
+  .Forest-Logo{
+    max-width: 0px;
+    max-height: 0px;
+  }
+  .ATS_title{
+    font-size: 2em;
+  }
+}
+
+<script>
+function myFunction(navIcon) {
+    navIcon.classList.toggle("change");
+}
+</script>
