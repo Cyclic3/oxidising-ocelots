@@ -20,7 +20,7 @@ add_compile_options("-ftrapv")
 find_package(c3-nu REQUIRED)
 
 # Makes a bunch of things r/o so it is harder to exploit
-add_link_options("-Wl,-z,relro,-z,now")
+#add_link_options("-Wl,-z,relro,-z,now")
 
 include_directories(include)
 
