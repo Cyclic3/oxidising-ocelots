@@ -1,0 +1,57 @@
+<!-- calling template -->
+{% extends "Layout/layout.html" %}
+
+
+{% block _content_ %}
+<h3>Hi. This is <strike><span style="font:bold;">Exploding Kittens</span></strike> Oxidising Ocelots. This is not a 'card game'</h3>
+
+    <section class="media content-section">
+        <div class="media-body">
+            <div class="section-metadata">
+                <a class="links" ></a>
+                <small class="text-muted"></small>
+            </div>
+        {% if askUsername %}
+            <form method="POST" action="">
+                <fieldset class="form-group">
+                    <div class="form">
+                        
+                        <div class="col-md-7 mb-1">
+                            <label for="username">It apears that you have not got a username. Please enter your desired username here:</label>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="JAppleseed" required>
+                        </div>
+                        <div class="border-top"></div>
+                        <div class="form" style="padding-top: 20px">
+                            <div class="col-md-auto mb-3">
+                                <input type="hidden" name="mode" value="userjoin"/>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        {% else %}
+            <form method="POST" action="">
+                <fieldset class="form-group">
+                    <div class="form">
+                        
+                        <div class="col-md-7 mb-1">
+                            <label for="room">Enter the room ID to join the game</label>
+                            <input type="text" class="form-control" id="room" name="room_ref" placeholder="JAppleseed" required>
+                        </div>
+                        <div class="border-top"></div>
+                        <div class="form" style="padding-top: 20px">
+                            <div class="col-md-auto mb-3">
+                                <input type="hidden" name="mode" value="roomref"/>
+                                <button type="submit" class="btn btn-primary">Join</button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+
+        {% endif %}
+
+        </div>
+    </section>
+{% endblock _content_ %}
