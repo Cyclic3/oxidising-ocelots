@@ -11,8 +11,12 @@ namespace oxidisingocelots {
 
   std::map<std::string, std::string> descs;
 
-  OCELOT_HANDLER(draw, "Draw a card", _, s) {
-    s->draw();
+  OCELOT_HANDLER(draw, "Draw a card, with an optional `player`", obj, s) {
+    if (auto id_ptr = obj.try_get_child("player"))
+      s->draw(id_ptr->as<c3::nu::obj_struct::int_t>());
+    else
+      s->draw();
+
     return {};
   }
 
@@ -45,11 +49,48 @@ namespace oxidisingocelots {
     return ret;
   }
 
+  OCELOT_HANDLER(play, "Play `card`, with an optional `player`", obj, s) {
+    card c = static_cast<card>(obj.get_child("card").as<c3::nu::obj_struct::int_t>());
+    player_id id;
+    if (auto id_ptr = obj.try_get_child("player"))
+      id = id_ptr->as<c3::nu::obj_struct::int_t>();
+    else
+      id = s->current_player().id;
+
+    auto& player = s->get_player(id);
+
+    // Try to play a revealed card first
+    if (auto iter = player.revealed_hand.find(c); iter != player.revealed_hand.end())
+      s->play(std::move(c));
+    // Try to play a hidden card
+    else if (auto iter = player.hand.find(c); iter != player.hand.end())
+      s->play(std::move(c));
+    else
+      throw std::runtime_error("Player does not have the requested card");
+
+    return {};
+  }
+
+  OCELOT_HANDLER(card_name, "Get the name of `card`", obj, _1) {
+    card c = static_cast<card>(obj.get_child("card").as<c3::nu::obj_struct::int_t>());
+
+    return card_names[c];
+  }
+
+  OCELOT_HANDLER(cards, "Get a list of cards names and their id", _1, _2) {
+    c3::nu::obj_struct ret;
+
+    for (auto i : card_names)
+      ret.emplace_child(i.second, static_cast<c3::nu::obj_struct::int_t>(i.first));
+
+    return ret;
+  }
+
   OCELOT_HANDLER(help, "List all the valid actions", _1, _2) {
     c3::nu::obj_struct ret;
     for (auto& i : descs)
       ret.emplace_child(i.first, i.second);
-    return ret;\
+    return ret;
   }
 
   c3::nu::obj_struct state_machine_api::handle(const c3::nu::obj_struct& input) {

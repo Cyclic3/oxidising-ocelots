@@ -12,8 +12,6 @@ std::string do_one(state_machine_api& s, std::string_view line) {
 int main() {
   state_machine_api s;
 
-  do_one(s, R"({"action":"init", "players":[1,2,3]})");
-
   try {
     std::string line;
     while(std::getline(std::cin, line))

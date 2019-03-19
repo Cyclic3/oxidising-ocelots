@@ -18,6 +18,7 @@ namespace oxidisingocelots {
     std::vector<player> players;
   private:
     bool is_forward = true;
+    bool finish_draw_top = true;
     uint pos = 0;
     uint goes_left = 1;
 
@@ -56,21 +57,43 @@ namespace oxidisingocelots {
       }
       goes_left = 1;
     }
-    void _oxidise();
+    void _oxidise(player_id id);
 
   public:
+    void kill();
     void shuffle();
     void play(card&& c);
-    void draw(bool top = true) {
-      auto ret = top ? _take_top() : _take_bottom();
+    void draw_top(player_id id) {
+      auto ret = _take_top();
 
       if (ret == card::OxidisingOcelot)
-        _oxidise();
+        _oxidise(id);
       else
-        current_player().pick_up(std::move(ret));
+        get_player(id).pick_up(std::move(ret));
+    }
+    void draw_bottom(player_id id) {
+      auto ret = _take_top();
+
+      if (ret == card::OxidisingOcelot)
+        _oxidise(id);
+      else
+        get_player(id).pick_up(std::move(ret));
+    }
+    void finish() {
+      if (finish_draw_top)
+        draw_top(current_player().id);
+      else
+        draw_bottom(current_player().id);
 
       if (--goes_left == 0)
         next_player();
+    }
+    player& get_player(player_id id) {
+      auto iter = std::find_if(players.begin(), players.end(), [&](auto& p) { return p.id == id; });
+      if (iter == players.end())
+        throw std::runtime_error("Invalid player id");
+      else
+        return *iter;
     }
 
   public:
