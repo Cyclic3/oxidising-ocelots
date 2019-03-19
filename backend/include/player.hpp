@@ -11,7 +11,7 @@ namespace oxidisingocelots {
   class player {
   public:
     player_id id;
-    std::multiset<card> hand = {};
+    std::multiset<card> hand;
     std::multiset<card> revealed_hand = {};
 
   private:
@@ -29,6 +29,10 @@ namespace oxidisingocelots {
       _reveal_card(_take_random_card());
     }
     bool defuse();
+
+  public:
+    inline bool operator==(player_id pid) { return id == pid; }
+    inline bool operator!=(player_id pid) { return id != pid; }
 
   public:
     player(player_id id) : id{id} {}

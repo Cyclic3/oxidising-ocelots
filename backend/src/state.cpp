@@ -12,22 +12,31 @@ namespace oxidisingocelots {
         throw std::runtime_error("Invalid card");
     }
   }
-  void state::_oxidise() {
-    // Check if the player has a defuse, and if so, play it
-    if (current_player().defuse())
-      return;
-
-    // Otherwise, they will die
-    // Steal the player
-    auto target = std::move(current_player());
-    players.erase(players.begin() + pos);
+  player state::kill(player_id id) {
+    auto iter = std::find(players.begin(), players.end(), id);
+    if (iter != players.end())
+      throw std::out_of_range("Invalid player id");
+    auto target = std::move(*iter);
+    players.erase(iter);
     // Now we fix the array
     if (is_forward)
       pos %= players.size();
     else
       pos != 0 ? --pos : pos = players.size() - 1;
+
+    return target;
+  }
+
+  void state::_oxidise(player_id id) {
+    // Check if the player has a defuse, and if so, play it
+    if (get_player(id).defuse())
+      return;
+
+    // Otherwise, they will die
+    // Steal the player
+
     // Now kill them
-    throw oxidation(std::move(target));
+    throw oxidation(state::kill(id));
   }
   state::state(std::vector<player> _players,
                int _n_extra_defuses,

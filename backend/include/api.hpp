@@ -14,13 +14,13 @@ namespace oxidisingocelots {
 
   class state_machine_api {
   public:
-    std::unique_ptr<state> s;
+    state s = std::vector<player>();
 
   public:
     static std::map<std::string,
-                    std::function<c3::nu::obj_struct(const c3::nu::obj_struct&, std::unique_ptr<state>& s)>> funcs;
+                    std::function<c3::nu::obj_struct(const c3::nu::obj_struct&, state& s)>> funcs;
 
   public:
-    c3::nu::obj_struct handle(const c3::nu::obj_struct&);
+    std::string handle(std::string_view);
   };
 }

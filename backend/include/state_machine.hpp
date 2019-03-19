@@ -15,7 +15,7 @@ namespace oxidisingocelots {
   private:
     std::deque<card> deck;
   public:
-    std::vector<player> players;
+    std::vector<player> players = {};
   private:
     bool is_forward = true;
     bool finish_draw_top = true;
@@ -60,7 +60,7 @@ namespace oxidisingocelots {
     void _oxidise(player_id id);
 
   public:
-    void kill();
+    player kill(player_id);
     void shuffle();
     void play(card&& c);
     void draw_top(player_id id) {
@@ -85,11 +85,14 @@ namespace oxidisingocelots {
       else
         draw_bottom(current_player().id);
 
+      // Reset top draw
+      finish_draw_top = true;
+
       if (--goes_left == 0)
         next_player();
     }
     player& get_player(player_id id) {
-      auto iter = std::find_if(players.begin(), players.end(), [&](auto& p) { return p.id == id; });
+      auto iter = std::find(players.begin(), players.end(), id);
       if (iter == players.end())
         throw std::runtime_error("Invalid player id");
       else

@@ -1,21 +1,24 @@
 #include "api.hpp"
 
 #define OCELOT_HANDLER(ACTION, DESC, STRUCT_VAR, STATE_VAR) \
-  c3::nu::obj_struct ocelot_action_##ACTION(const c3::nu::obj_struct&, std::unique_ptr<state>&); \
+  c3::nu::obj_struct ocelot_action_##ACTION(const c3::nu::obj_struct&, state&); \
   static auto _ocelot_action_##ACTION##_funcs = state_machine_api::funcs.emplace(#ACTION, ocelot_action_##ACTION); \
   static auto _ocelot_action_##ACTION##_descs = descs.emplace(#ACTION, DESC); \
-  c3::nu::obj_struct ocelot_action_##ACTION(const c3::nu::obj_struct& STRUCT_VAR, std::unique_ptr<state>& STATE_VAR)
+  c3::nu::obj_struct ocelot_action_##ACTION(const c3::nu::obj_struct& STRUCT_VAR, state& STATE_VAR)
 
 namespace oxidisingocelots {
   decltype(state_machine_api::funcs) state_machine_api::funcs;
 
   std::map<std::string, std::string> descs;
 
-  OCELOT_HANDLER(draw, "Draw a card, with an optional `player`", obj, s) {
-    if (auto id_ptr = obj.try_get_child("player"))
-      s->draw(id_ptr->as<c3::nu::obj_struct::int_t>());
-    else
-      s->draw();
+  OCELOT_HANDLER(finish, "Finish a players go", _, s) {
+    s.finish();
+
+    return {};
+  }
+
+  OCELOT_HANDLER(kill, "Remove `player`", obj, s) {
+    s.kill(static_cast<player_id>(obj.get_child("player").as<c3::nu::obj_struct::int_t>()));
 
     return {};
   }
@@ -24,17 +27,17 @@ namespace oxidisingocelots {
     std::vector<player> players;
     for (auto i : obj.get_child("players").as<c3::nu::obj_struct::arr_t>())
       players.emplace_back(i.as<c3::nu::obj_struct::int_t>());
-    s = std::make_unique<state>(std::move(players));
+    s = std::move(players);
     return {};
   }
 
   OCELOT_HANDLER(dump, "Dump the current state", _, s) {
     c3::nu::obj_struct ret;
-    ret["current_player"] = s->current_player().id;
-    ret["goes_left"] = s->n_goes_left();
+    ret["current_player"] = s.current_player().id;
+    ret["goes_left"] = s.n_goes_left();
     {
       auto& players = ret["players"];
-      for (auto& i : s->players) {
+      for (auto& i : s.players) {
         auto& p = players[std::to_string(i.id)];
         auto& priv = p["hand"].as<c3::nu::obj_struct::arr_t>();
         for (auto card : i.hand)
@@ -49,7 +52,7 @@ namespace oxidisingocelots {
     return ret;
   }
 
-  OCELOT_HANDLER(play, "Play `card`, with an optional `player`", obj, s) {
+  OCELOT_HANDLER(play, "Play `card`, with an optional `player`, defaulting to the current player", obj, s) {
     card c = static_cast<card>(obj.get_child("card").as<c3::nu::obj_struct::int_t>());
     player_id id;
     if (auto id_ptr = obj.try_get_child("player"))
@@ -93,12 +96,25 @@ namespace oxidisingocelots {
     return ret;
   }
 
-  c3::nu::obj_struct state_machine_api::handle(const c3::nu::obj_struct& input) {
-    const std::string& action = input.get_child("action").as<std::string>();
-    if (auto iter = funcs.find(action); iter != funcs.end()) {
-      return iter->second(input, s);
+  std::string state_machine_api::handle(std::string_view str) {
+    c3::nu::obj_struct ret;
+
+    try {
+      c3::nu::obj_struct input = c3::nu::json_decode(str);
+      const std::string& action = input.get_child("action").as<std::string>();
+      if (auto iter = funcs.find(action); iter != funcs.end()) {
+        ret["result"] = iter->second(input, s);
+        ret["succeeded"] = true;
+      }
+      else
+        throw std::runtime_error("Requested action not found");
     }
-    else
-      throw std::runtime_error("Requested action not found");
+    catch(const std::exception& exn) {
+      ret["succeeded"] = false;
+      ret["result"] = std::string(exn.what());
+    }
+
+
+    return c3::nu::json_encode(ret);
   }
 }
