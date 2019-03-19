@@ -1,12 +1,49 @@
 #include "state_machine.hpp"
 
 namespace oxidisingocelots {
+  void flow::finish() {
+    if (--goes_left != 0)
+      return;
+
+    step();
+
+    if (last_step == 0)
+      return;
+    else if (last_step > 0) {
+      pos += n_players;
+    }
+    else { // (step < 0)
+      if (pos == 0)
+        pos = n_players - 1;
+      else
+        --pos;
+    }
+
+    if (pos >= n_players)
+      // Provide helpful and thoughtful error message
+      throw std::runtime_error("LUKSHAN YOU MESSED UP "
+                               "THEY'RE TRYING TO HACK ME WITH PLAYER BOUNDS");
+
+    // Check the next player actually has some goes
+    if ((goes_left = next_player_goes()) == 0)
+      finish();
+  }
+
   void state::play(card&& c) {
     switch (c) {
-      case (card::Skip): next_player(); break;
-      case (card::Attack): next_player(); ++goes_left; break;
+      case (card::Skip): {
+        f.reset_step([](size_t) { return std::pair{ 1, clearup::Reset }; });
+      } break;
+      case (card::Attack): {
+        // Skip
+        f.reset_step([](size_t) { return std::pair{ 1, clearup::Reset }; });
+        // Attack
+        f.reset_next_player_goes([]() { return std::pair{ 2, clearup::Reset }; });
+      } break;
       case (card::Shuffle): shuffle(); break;
-      case (card::Reverse): is_forward = !is_forward; break;
+      case (card::Reverse): {
+        f.reset_step([](size_t step) { return std::pair{ step * -1, clearup::Reset }; });
+      } break;
 
       default:
         throw std::runtime_error("Invalid card");
@@ -18,7 +55,9 @@ namespace oxidisingocelots {
       throw std::out_of_range("Invalid player id");
     auto target = std::move(*iter);
     players.erase(iter);
-    // Now we fix the array
+    // TODO: fix the array post removal
+    //
+    // Have fun with the TC code!
     if (is_forward)
       pos %= players.size();
     else
@@ -43,7 +82,7 @@ namespace oxidisingocelots {
                int _n_extra_ocelots,
                std::vector<card> _deck,
                int _n_dealt_cards) :
-      deck{_deck.begin(), _deck.end()} {
+      deck{_deck.begin(), _deck.end()}, f{_players.size()} {
     if (_players.size() == 0)
       throw std::runtime_error("Need at least 1 player!");
 

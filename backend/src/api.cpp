@@ -40,7 +40,7 @@ namespace oxidisingocelots {
     REQUIRE_STATE(s);
     c3::nu::obj_struct ret;
     ret["current_player"] =s->current_player().id;
-    ret["goes_left"] =s->n_goes_left();
+    ret["goes_left"] = s->f.goes_left;
     {
       auto& players = ret["players"];
       for (auto& i :s->players) {
