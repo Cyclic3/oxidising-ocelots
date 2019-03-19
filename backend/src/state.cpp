@@ -45,6 +45,8 @@ namespace oxidisingocelots {
                int _n_dealt_cards) :
       deck{_deck.begin(), _deck.end()} {
 
+    if (players.size() == 0) return;
+
     shuffle();
 
     // Then we act on the players
