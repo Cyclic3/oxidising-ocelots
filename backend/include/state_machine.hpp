@@ -19,8 +19,8 @@ namespace oxidisingocelots {
   private:
     bool is_forward = true;
     bool finish_draw_top = true;
-    uint pos = 0;
-    uint goes_left = 1;
+    unsigned int pos = 0;
+    unsigned int goes_left = 1;
 
   public:
     inline player& current_player() { return players[pos]; }

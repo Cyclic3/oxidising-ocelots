@@ -6,7 +6,7 @@
 #include "card.hpp"
 
 namespace oxidisingocelots {
-  using player_id = uint32_t;
+  using player_id = unsigned int32_t;
 
   class player {
   public:
