@@ -5,8 +5,28 @@ try:
 except:
 	while True:
 		input("You are missing dependencies. Please use pip to install the following \n Flask \n Flask-SocketIO==3.1.2")
-import re
+import re, json
+from threading import Thread
 rooms = {}
+
+
+oldList = activeList = []
+checked = False
+
+def checkAlive():
+	if checked == False:
+		oldList = activeList
+		activeList = []
+		socketio.emit('AreYouAlive')
+		checked = True
+		return False
+		
+	elif checked == True:
+		
+		checked = False
+		return ("please check console")
+
+
 
 
 app = Flask(__name__)
@@ -16,7 +36,6 @@ socketio = SocketIO(app)
 
 @app.route("/", methods = ["GET","POST"])
 def home():
-	print(listRooms())
 	userData = (request.cookies.get('username'), sanitiseInput(request.cookies.get('userID')), listRooms())
 
 	if (request.remote_addr.startswith('127') or request.remote_addr == '::1'):
@@ -26,15 +45,14 @@ def home():
 
 	if request.method == 'GET':
 		if not userData[0] and not userData[1]:
-			return render_template("Home.html", userData = userData, askUsername = True, sidebar = True, printRef = printRef)
+			return render_template("Home.html", userData = userData, askUsername = True, sidebar = True, printRef = True)
 		else:
-			return render_template("Home.html", userData = userData, askUsername = False, sidebar = True, printRef = printRef)
+			return render_template("Home.html", userData = userData, askUsername = False, sidebar = True, printRef = True)
 
 
 	if request.method == 'POST':
 
 		if request.form['mode'] == 'userjoin':
-			print (request.form)
 			resp = make_response(redirect(url_for('home')))
 			resp.set_cookie('username', sanitiseInput(request.form['username']))
 			resp.set_cookie('userID', generateID(0xFFFFFFFF))
@@ -46,7 +64,7 @@ def home():
 				flash ('That room cannot be found.', 'warning')
 				return redirect(url_for('home'))
 			else:
-				pass
+				return redirect(url_for('room', roomRefrence=room_ref))
 
 
 
@@ -85,6 +103,13 @@ def create_room_page():
 
 @app.route("/room/<roomRefrence>")
 def room(roomRefrence):
+	userData = (request.cookies.get('username'), sanitiseInput(request.cookies.get('userID')), listRooms())
+
+	if not userData[0] and not userData[1]:
+		flash("You have not provided a username yet", 'warning')
+		return redirect(url_for('home'))	
+
+
 	if not roomRefrence in rooms:
 		flash('That room cannot be found','warning')
 		return redirect(url_for('home'))
@@ -92,14 +117,74 @@ def room(roomRefrence):
 	return render_template('room.html', userData = userData)
 
 
+
+@app.route("/au")
+def au():
+	global a, activeList
+	if a == False:
+		activeList = []
+		socketio.emit('AreYouAlive')
+		a = True
+		return ('polling, please refresh page in a few seconds')
+	elif a == True:
+		print (activeList)
+		a = False
+		return ("please check console")
+
+
+@socketio.on('IAmAlive')
+def amAliveNotification():
+	global activeList
+	activeList.append(request.cookies.get('userID'))
+
+
+
 def messageReceived(methods=['GET', 'POST']):
     print('message was received!!!')
 
 
-@socketio.on('chat')
-def handle_my_custom_event(json, methods=['GET', 'POST']):
-    print('received my event: ' + str(json))
-    socketio.emit('my response', json, callback=messageReceived)
+@socketio.on('connect')
+def on_connect():
+
+    jsonData = {
+    'userID': sanitiseInput(request.cookies.get('userID')),
+    'user_name': sanitiseInput(request.cookies.get('username')),
+    'message': '<b><i>User Connected</i></b>'
+    }
+    socketio.emit('ActionResponse', jsonData, callback=messageReceived)
+
+@socketio.on('disconnect')
+def on_disconnect():
+
+    jsonData = {
+    'userID': sanitiseInput(request.cookies.get('userID')),
+    'user_name': sanitiseInput(request.cookies.get('username')),
+    'message': '<b><i>User Disconnected</i></b>'
+    }
+    socketio.emit('ActionResponse', jsonData, callback=messageReceived)
+
+
+
+@socketio.on('ActionHappened')
+def handle_my_custom_event(jsonData, methods=['GET', 'POST']):
+	print ("\n\n\n\n")
+	print (jsonData)
+
+
+	jsonData['userID'] = request.cookies.get('userID')
+	jsonData['username'] = request.cookies.get('username')
+	jsonData['user_name'] = request.cookies.get('username')
+
+	for i in jsonData:
+		jsonData[i] = sanitiseInput(jsonData[i])
+
+	if 'messageBold' in jsonData:
+		jsonData['message'] = ("<b><i>"+jsonData.pop('messageBold')+"</i></b>")
+
+
+	print (jsonData)
+	print ("\n\n\n\n")
+	socketio.emit('ActionResponse', jsonData, callback=messageReceived)
 
 
 
@@ -111,7 +196,7 @@ def sanitiseInput(input):
 		output = re.sub(r'[^\w\s]', '', input)
 		return output
 	else:
-		return None
+		return input
 
 
 
@@ -122,7 +207,6 @@ def generateID(val):
 
 def listRooms():
 	a = []
-	print (rooms)
 	for i in rooms:
 		i = (rooms[i])
 		a.append([i.roomName, i.roomID, len(i.roomUsers), i.activeGame])
@@ -148,3 +232,4 @@ class game_room:
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host='0.0.0.0')
+    #socketio.run(app, debug=True)
