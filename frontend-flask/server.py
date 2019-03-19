@@ -1,12 +1,17 @@
-from flask import Flask, abort, render_template, redirect, make_response, url_for, flash
-from flask import request
+try:
+	from flask import Flask, abort, render_template, redirect, make_response, url_for, flash, request
+	from flask_socketio import SocketIO
 
+except:
+	while True:
+		input("You are missing dependencies. Please use pip to install the following \n Flask \n Flask-SocketIO==3.1.2")
 import re
-rooms = []
+rooms = {}
+
 
 app = Flask(__name__)
-
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+socketio = SocketIO(app)
 
 
 @app.route("/", methods = ["GET","POST"])
@@ -14,21 +19,34 @@ def home():
 	print(listRooms())
 	userData = (request.cookies.get('username'), sanitiseInput(request.cookies.get('userID')), listRooms())
 
+	if (request.remote_addr.startswith('127') or request.remote_addr == '::1'):
+		printRef = True
+	else:
+		printRef = False
+
 	if request.method == 'GET':
 		if not userData[0] and not userData[1]:
-			return render_template("Home.html", userData = userData, askUsername = True, sidebar = True)
+			return render_template("Home.html", userData = userData, askUsername = True, sidebar = True, printRef = printRef)
 		else:
-			return render_template("Home.html", userData = userData, askUsername = False, sidebar = True)
+			return render_template("Home.html", userData = userData, askUsername = False, sidebar = True, printRef = printRef)
 
 
 	if request.method == 'POST':
-		if not userData[0] and not userData[1]:
+
+		if request.form['mode'] == 'userjoin':
+			print (request.form)
 			resp = make_response(redirect(url_for('home')))
 			resp.set_cookie('username', sanitiseInput(request.form['username']))
 			resp.set_cookie('userID', generateID(0xFFFFFFFF))
 			return resp
-		else:
-			pass#Do room stuff
+
+		elif request.form['mode'] == 'roomref':
+			room_ref = request.form['room_ref']
+			if not room_ref in rooms:
+				flash ('That room cannot be found.', 'warning')
+				return redirect(url_for('home'))
+			else:
+				pass
 
 
 
@@ -61,14 +79,36 @@ def create_room_page():
 	if request.method == 'GET':
 		return (render_template("CreateRoom.html", userData = userData))
 	elif request.method == 'POST':
-		game_room(sanitiseInput(request.form['roomName']))
-		flash("Room has been created", 'success')
+		roomIDCreated = (game_room(sanitiseInput(request.form['roomName'])).roomID)
+		flash(("Room has been created. Your roomID is " + str(roomIDCreated)), 'success')
 		return redirect(url_for('home'))
 
+@app.route("/room/<roomRefrence>")
+def room(roomRefrence):
+	if not roomRefrence in rooms:
+		flash('That room cannot be found','warning')
+		return redirect(url_for('home'))
+	userData = (request.cookies.get('username'), sanitiseInput(request.cookies.get('userID')), listRooms())
+	return render_template('room.html', userData = userData)
+
+
+def messageReceived(methods=['GET', 'POST']):
+    print('message was received!!!')
+
+
+@socketio.on('chat')
+def handle_my_custom_event(json, methods=['GET', 'POST']):
+    print('received my event: ' + str(json))
+    socketio.emit('my response', json, callback=messageReceived)
+
+
+
+
+#<-------------------------------------------------------------------------------->
 
 def sanitiseInput(input):
 	if input:
-		output = re.sub(r'[^\w]', '', input)
+		output = re.sub(r'[^\w\s]', '', input)
 		return output
 	else:
 		return None
@@ -82,7 +122,9 @@ def generateID(val):
 
 def listRooms():
 	a = []
+	print (rooms)
 	for i in rooms:
+		i = (rooms[i])
 		a.append([i.roomName, i.roomID, len(i.roomUsers), i.activeGame])
 	return a
 
@@ -96,7 +138,13 @@ class game_room:
 		self.AddToActiveRooms()
 
 	def AddToActiveRooms(self):
-		rooms.append(self)
+		rooms.update({self.roomID: self})
 
 	def RemoveFromActiveRooms(self):
-		rooms.remove(self)
+		del rooms[self.roomID]
+
+	def AddUserToRoom(self, userID):
+		self.roomUsers.append(userID)
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True, host='0.0.0.0')

@@ -41,7 +41,7 @@
 			<div style="position:relative; left: 40px; bottom: 15px; font-size: 1.2em;">Navbar</div>
 		</div>
 		<ul>
-			<a href=""><li>Home</li></a>
+			<a href="{{url_for('home')}}"><li>Home</li></a>
 			<a href="{{url_for('create_room_page')}}"><li>Make room (Server Host only)</li></a>
 			<a href=""><li></li></a>
 
@@ -81,9 +81,26 @@
 				<div class="content-section">
 					<h3>Active Rooms</h3>
 						<ul class="list-group">
-							{% for room in userData[2] %}
-								<a class='sidebaritem' href=""><li class="list-group-item list-group-item-light">{{room[0]}}, {{room[1]}}, {{room[2]}} players</li></a>
-							{% endfor %}
+							<table>
+								<tr>
+									<th>Room Name</th>
+									{% if printRef %}
+										<th>RoomID</th>
+									{% endif %}
+									<th>Players</th>
+								</tr>
+								{% for room in userData[2] %}
+									<a class='sidebaritem' href=""><li class="list-group-item list-group-item-light">
+										<tr>
+											<td>{{room[0]}}</td>
+											{% if printRef %}
+												<td>{{room[1]}}</td>
+											{% endif %}
+											<td>{{room[2]}}</td>
+										</tr>
+									</li></a>
+								{% endfor %}
+							</table>
 						</ul>
 				</div>		
 			</div>
