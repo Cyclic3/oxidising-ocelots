@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace oxidisingocelots {
-  enum class card : unsigned int8_t {
+  enum class card : uint8_t {
     OxidisingOcelot = 0,
     Skip = 1,
     Attack = 2,
