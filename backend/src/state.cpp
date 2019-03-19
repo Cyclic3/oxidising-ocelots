@@ -44,8 +44,8 @@ namespace oxidisingocelots {
                std::vector<card> _deck,
                int _n_dealt_cards) :
       deck{_deck.begin(), _deck.end()} {
-
-    if (players.size() == 0) return;
+    if (_players.size() == 0)
+      throw std::runtime_error("Need at least 1 player!");
 
     shuffle();
 
