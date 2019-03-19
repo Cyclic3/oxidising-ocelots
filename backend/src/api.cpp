@@ -58,16 +58,16 @@ namespace oxidisingocelots {
     if (auto id_ptr = obj.try_get_child("player"))
       id = id_ptr->as<c3::nu::obj_struct::int_t>();
     else
-      id = s->current_player().id;
+      id = s.current_player().id;
 
-    auto& player = s->get_player(id);
+    auto& player = s.get_player(id);
 
     // Try to play a revealed card first
     if (auto iter = player.revealed_hand.find(c); iter != player.revealed_hand.end())
-      s->play(std::move(c));
+      s.play(std::move(c));
     // Try to play a hidden card
     else if (auto iter = player.hand.find(c); iter != player.hand.end())
-      s->play(std::move(c));
+      s.play(std::move(c));
     else
       throw std::runtime_error("Player does not have the requested card");
 
