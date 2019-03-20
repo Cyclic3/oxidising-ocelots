@@ -7,14 +7,15 @@
 namespace oxidisingocelots {
   enum class card : uint8_t {
     OxidisingOcelot = 0,
-    Skip = 1,
-    Attack = 2,
-    Shuffle = 3,
-    Defuse = 4,
-    Reverse = 5,
-    Ambiguous = 6,
-    Normal = 7,
-    Mark = 8
+    Defuse,
+    Skip,
+    Attack,
+    Shuffle,
+    Reverse,
+    Mark,
+    ErraticElephant,
+    Steal,
+    Mug,
   };
 
   extern std::map<card, std::string> card_names;

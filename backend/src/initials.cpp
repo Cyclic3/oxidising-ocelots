@@ -5,14 +5,14 @@
 namespace oxidisingocelots {
   std::map<card, std::string> card_names {
     { card::OxidisingOcelot, "Oxidising Ocelot" },
+    { card::Defuse, "Defuse" },
     { card::Skip, "Skip" },
     { card::Attack, "Attack" },
     { card::Shuffle, "Shuffle" },
     { card::Reverse, "Reverse" },
-    { card::Defuse, "Defuse" },
-    { card::Reverse, "Reverse" },
-    { card::Ambiguous, "Ambiguous" },
-    { card::Normal, "Normal" },
+    { card::ErraticElephant, "Erratic Elephant" },
+    { card::Steal, "Steal" },
+    { card::Mug, "Mug" },
   };
 
   std::vector<card> initial_deck {
@@ -24,12 +24,12 @@ namespace oxidisingocelots {
     card::Reverse, card::Reverse, card::Reverse, card::Reverse,
     // Four shuffles
     card::Shuffle, card::Shuffle, card::Shuffle, card::Shuffle,
-    // 16 normals
-    card::Normal, card::Normal, card::Normal, card::Normal,
-    card::Normal, card::Normal, card::Normal, card::Normal,
-    card::Normal, card::Normal, card::Normal, card::Normal,
-    card::Normal, card::Normal, card::Normal, card::Normal,
-    // 4 ambiguous
-    card::Ambiguous, card::Ambiguous, card::Ambiguous, card::Ambiguous
+    // Four elephants
+    card::ErraticElephant, card::ErraticElephant, card::ErraticElephant, card::ErraticElephant,
+    // Four steal
+    card::Steal, card::Steal, card::Steal, card::Steal,
+    // Two mug
+    //card::Mug, card::Mug
   };
 }
+

@@ -48,10 +48,10 @@ namespace oxidisingocelots {
         auto& priv = p["hand"].as<c3::nu::obj_struct::arr_t>();
         for (auto card : i.hand)
           priv.push_back(static_cast<int>(card));
-
+/*
         auto& pub = p["revealed_hand"].as<c3::nu::obj_struct::arr_t>();
         for (auto card : i.revealed_hand)
-          pub.push_back(static_cast<int>(card));
+          pub.push_back(static_cast<int>(card));*/
       }
     }
 
@@ -70,10 +70,10 @@ namespace oxidisingocelots {
     auto& player =s->get_player(id);
 
     // Try to play a revealed card first
-    if (auto iter = player.revealed_hand.find(c); iter != player.revealed_hand.end())
-     s->play(std::move(c));
+    //if (auto iter = player.revealed_hand.find(c); iter != player.revealed_hand.end())
+    // s->play(std::move(c));
     // Try to play a hidden card
-    else if (auto iter = player.hand.find(c); iter != player.hand.end())
+    /*else*/ if (auto iter = player.hand.find(c); iter != player.hand.end())
      s->play(std::move(c));
     else
       throw std::runtime_error("Player does not have the requested card");

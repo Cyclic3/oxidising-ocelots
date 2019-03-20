@@ -26,6 +26,9 @@ namespace oxidisingocelots {
     size_t goes_left = 1;
     ssize_t last_step = 1;
 
+  public:
+    decltype(pos) random();
+
   private:
     // Takes in the last step size
     //
@@ -98,6 +101,7 @@ namespace oxidisingocelots {
 
   public:
     inline player& current_player() { return players[f.pos]; }
+    inline player& random_player() { return players[f.random()]; }
   private:
     inline card _take_top() {
       auto ret = deck.front();

@@ -28,55 +28,26 @@ namespace oxidisingocelots {
     if ((goes_left = next_player_goes()) == 0)
       finish();
   }
-
-  void state::play(card&& c) {
-    switch (c) {
-      case (card::Skip): {
-        f.reset_step([](size_t) { return std::pair{ 1, clearup::Reset }; });
-      } break;
-      case (card::Attack): {
-        // Skip
-        f.reset_step([](size_t) { return std::pair{ 1, clearup::Reset }; });
-        // Attack
-        f.reset_next_player_goes([]() { return std::pair{ 2, clearup::Reset }; });
-      } break;
-      case (card::Shuffle): shuffle(); break;
-      case (card::Reverse): {
-        f.reset_step([](size_t step) { return std::pair{ step * -1, clearup::Reset }; });
-      } break;
-
-      default:
-        throw std::runtime_error("Invalid card");
-    }
-  }
   player state::kill(player_id id) {
     auto iter = std::find(players.begin(), players.end(), id);
     if (iter != players.end())
       throw std::out_of_range("Invalid player id");
     auto target = std::move(*iter);
+    // Reset the flow, and go to the next player
+    f.reset_draw();
+    f.reset_next_player_goes();
+    f.reset_step();
+    f.last_step = 1;
+
+    // Skip the current players go
+    f.finish();
+
+    // Kill the player
     players.erase(iter);
-    // TODO: fix the array post removal
-    //
-    // Have fun with the TC code!
-    if (is_forward)
-      pos %= players.size();
-    else
-      pos != 0 ? --pos : pos = players.size() - 1;
 
     return target;
   }
 
-  void state::_oxidise(player_id id) {
-    // Check if the player has a defuse, and if so, play it
-    if (get_player(id).defuse())
-      return;
-
-    // Otherwise, they will die
-    // Steal the player
-
-    // Now kill them
-    throw oxidation(state::kill(id));
-  }
   state::state(std::vector<player> _players,
                int _n_extra_defuses,
                int _n_extra_ocelots,
