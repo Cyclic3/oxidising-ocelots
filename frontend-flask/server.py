@@ -58,6 +58,7 @@ def checkAliveCycle(debug):
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 300
 socketio = SocketIO(app)
 
 
@@ -271,5 +272,5 @@ GetRid = game_room('lukshans room')
 if __name__ == '__main__':
 	debug = False
 	Thread(target = checkAliveCycle, args =(debug,) ).start()
-	socketio.run(app, debug=debug, host='0.0.0.0')
+	app = socketio.run(app, debug=debug, host='0.0.0.0')
 	#socketio.run(app, debug=True)
