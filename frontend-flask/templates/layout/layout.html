@@ -94,7 +94,7 @@
 										<tr>
 											<td>{{room[0]}}</td>
 											{% if printRef %}
-												<td>{{room[1]}}</td>
+												<td><a href ="{{url_for( 'room', roomRefrence = room[1])}}">{{room[1]}}</a></td>
 											{% endif %}
 											<td>{{room[2]}}</td>
 										</tr>
