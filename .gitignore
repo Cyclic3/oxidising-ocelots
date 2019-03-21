@@ -2,3 +2,5 @@
 *.pyc
 # For qtcreator
 **/CMakeLists.txt.user*
+# For c++ build
+**/build
