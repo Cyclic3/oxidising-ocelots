@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e -x
 
-SOURCEDIR="$(dirname $0 | xargs realpath)"
+SOURCEDIR=$(cd "$(dirname "$0")"; pwd -P)
 
 BASEDIR=$(mktemp -d)
 
