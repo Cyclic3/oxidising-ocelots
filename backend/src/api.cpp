@@ -14,7 +14,8 @@ namespace oxidisingocelots {
 
   std::map<std::string, std::string> descs;
 
-  OCELOT_HANDLER(finish, "Finish a players go", _, s) {
+  OCELOT_HANDLER(finish, "Finish the current player's go", _, s) {
+    (void)_;
     REQUIRE_STATE(s);
     s->finish();
 
@@ -28,7 +29,7 @@ namespace oxidisingocelots {
     return {};
   }
 
-  OCELOT_HANDLER(init, "Reset the state, with given `players`", obj, s) {
+  OCELOT_HANDLER(init, "Reset the state, with given `players` as an array of player ids", obj, s) {
     std::vector<player> players;
     for (auto i : obj.get_child("players").as<c3::nu::obj_struct::arr_t>())
       players.emplace_back(i.as<c3::nu::obj_struct::int_t>());
@@ -37,6 +38,7 @@ namespace oxidisingocelots {
   }
 
   OCELOT_HANDLER(dump, "Dump the current state", _, s) {
+    (void)_;
     REQUIRE_STATE(s);
     c3::nu::obj_struct ret;
     ret["current_player"] =s->current_player().id;
@@ -67,14 +69,14 @@ namespace oxidisingocelots {
     else
       id =s->current_player().id;
 
-    auto& player =s->get_player(id);
+    auto& player = s->get_player(id);
 
-    // Try to play a revealed card first
-    //if (auto iter = player.revealed_hand.find(c); iter != player.revealed_hand.end())
-    // s->play(std::move(c));
-    // Try to play a hidden card
-    /*else*/ if (auto iter = player.hand.find(c); iter != player.hand.end())
-     s->play(std::move(c));
+    if (auto iter = player.hand.find(c); iter != player.hand.end()) {
+      if (auto params = obj.try_get_child("params"))
+        s->play(std::move(c), *params);
+      else
+        s->play(std::move(c));
+    }
     else
       throw std::runtime_error("Player does not have the requested card");
 
@@ -82,21 +84,30 @@ namespace oxidisingocelots {
   }
 
   OCELOT_HANDLER(card_name, "Get the name of `card`", obj, _1) {
+    (void)_1;
+
     card c = static_cast<card>(obj.get_child("card").as<c3::nu::obj_struct::int_t>());
 
     return card_names[c];
   }
 
-  OCELOT_HANDLER(cards, "Get a list of cards names and their id", _1, _2) {
+  OCELOT_HANDLER(cards, "Get a list of cards names, their ids, and their parameters", _1, _2) {
+    (void)_1,(void)_2;
     c3::nu::obj_struct ret;
 
-    for (auto i : card_names)
-      ret.emplace_child(i.second, static_cast<c3::nu::obj_struct::int_t>(i.first));
+    for (auto i : card_names) {
+      auto& c = ret[i.second];
+      c["id"] = static_cast<c3::nu::obj_struct::int_t>(i.first);
+      auto& params = c["params"];
+      for (auto param : card_params.at(i.first))
+        params[param.first] = param.second;
+    }
 
     return ret;
   }
 
   OCELOT_HANDLER(help, "List all the valid actions", _1, _2) {
+    (void)_1,(void)_2;
     c3::nu::obj_struct ret;
     for (auto& i : descs)
       ret.emplace_child(i.first, i.second);

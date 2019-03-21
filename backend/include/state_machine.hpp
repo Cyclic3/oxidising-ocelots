@@ -128,7 +128,7 @@ namespace oxidisingocelots {
   public:
     player kill(player_id);
     void shuffle();
-    void play(card&& c);
+    void play(card&& c, const c3::nu::obj_struct& params = {});
     void deal(card&& c, player_id id) {
       if (c == card::OxidisingOcelot)
         _oxidise(id);
