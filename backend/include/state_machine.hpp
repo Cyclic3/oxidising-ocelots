@@ -65,7 +65,7 @@ namespace oxidisingocelots {
     size_t next_player_goes() {
       auto t = _next_player_goes();
       if (t.second == clearup::Reset)
-        reset_draw();
+        reset_next_player_goes();
       return t.first;
     }
 
