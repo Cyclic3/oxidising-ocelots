@@ -88,7 +88,11 @@ namespace oxidisingocelots {
     void finish();
 
   public:
-    inline flow(size_t n) : n_players{n} {}
+    inline flow(size_t n) : n_players{n} {
+      reset_draw();
+      reset_next_player_goes();
+      reset_step();
+    }
   };
 
   class state {
