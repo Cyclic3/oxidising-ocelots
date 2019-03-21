@@ -12,22 +12,19 @@ namespace oxidisingocelots {
   public:
     player_id id;
     std::multiset<card> hand;
-    std::multiset<card> revealed_hand = {};
+    //std::multiset<card> revealed_hand = {};
 
   private:
-    card _take_random_card();
-    inline void _reveal_card(card&& c) {
+    /*inline void _reveal_card(card&& c) {
       revealed_hand.emplace(std::move(c));
-    }
+    }*/
     void _oxidise();
 
   public:
     inline void pick_up(card&& c) {
       hand.emplace(std::move(c));
     }
-    inline void reveal_random_card() {
-      _reveal_card(_take_random_card());
-    }
+    card take_random_card();
     bool defuse();
 
   public:

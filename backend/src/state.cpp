@@ -1,49 +1,59 @@
 #include "state_machine.hpp"
 
 namespace oxidisingocelots {
-  void state::play(card&& c) {
-    switch (c) {
-      case (card::Skip): next_player(); break;
-      case (card::Attack): next_player(); ++goes_left; break;
-      case (card::Shuffle): shuffle(); break;
-      case (card::Reverse): is_forward = !is_forward; break;
+  void flow::finish() {
+    if (--goes_left != 0)
+      return;
 
-      default:
-        throw std::runtime_error("Invalid card");
+    step();
+
+    if (last_step == 0)
+      return;
+    else if (last_step > 0) {
+      pos += n_players;
     }
+    else { // (step < 0)
+      if (pos == 0)
+        pos = n_players - 1;
+      else
+        --pos;
+    }
+
+    if (pos >= n_players)
+      // Provide helpful and thoughtful error message
+      throw std::runtime_error("LUKSHAN YOU MESSED UP "
+                               "THEY'RE TRYING TO HACK ME WITH PLAYER BOUNDS");
+
+    // Check the next player actually has some goes
+    if ((goes_left = next_player_goes()) == 0)
+      finish();
   }
   player state::kill(player_id id) {
     auto iter = std::find(players.begin(), players.end(), id);
     if (iter != players.end())
       throw std::out_of_range("Invalid player id");
     auto target = std::move(*iter);
+    // Reset the flow, and go to the next player
+    f.reset_draw();
+    f.reset_next_player_goes();
+    f.reset_step();
+    f.last_step = 1;
+
+    // Skip the current players go
+    f.finish();
+
+    // Kill the player
     players.erase(iter);
-    // Now we fix the array
-    if (is_forward)
-      pos %= players.size();
-    else
-      pos != 0 ? --pos : pos = players.size() - 1;
 
     return target;
   }
 
-  void state::_oxidise(player_id id) {
-    // Check if the player has a defuse, and if so, play it
-    if (get_player(id).defuse())
-      return;
-
-    // Otherwise, they will die
-    // Steal the player
-
-    // Now kill them
-    throw oxidation(state::kill(id));
-  }
   state::state(std::vector<player> _players,
                int _n_extra_defuses,
                int _n_extra_ocelots,
                std::vector<card> _deck,
                int _n_dealt_cards) :
-      deck{_deck.begin(), _deck.end()} {
+      deck{_deck.begin(), _deck.end()}, f{_players.size()} {
     if (_players.size() == 0)
       throw std::runtime_error("Need at least 1 player!");
 
