@@ -136,7 +136,7 @@ namespace oxidisingocelots {
       else
         throw std::runtime_error("Requested action not found");
     }
-    catch(const std::exception& exn) {
+    catch(std::exception& exn) {
       ret["succeeded"] = false;
       ret["result"] = std::string(exn.what());
       if (debug)
