@@ -6,6 +6,7 @@ namespace oxidisingocelots {
   class state_machine_api {
   public:
     std::unique_ptr<state> s;
+    bool debug = false;
 
   public:
     static std::map<std::string,
