@@ -7,18 +7,6 @@ namespace oxidisingocelots {
 
     step();
 
-    if (last_step == 0)
-      return;
-    else if (last_step > 0) {
-      pos += n_players;
-    }
-    else { // (step < 0)
-      if (pos == 0)
-        pos = n_players - 1;
-      else
-        --pos;
-    }
-
     if (pos >= n_players)
       // Provide helpful and thoughtful error message
       throw std::runtime_error("LUKSHAN YOU MESSED UP "
