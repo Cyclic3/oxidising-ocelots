@@ -130,7 +130,7 @@ namespace oxidisingocelots {
       c3::nu::obj_struct input = c3::nu::json_decode(str);
       const std::string& action = input.get_child("action").as<std::string>();
       if (auto iter = funcs.find(action); iter != funcs.end()) {
-        ret["result"] = iter->second(input, s);
+        ret["result"] = iter->second(input, *this);
         ret["succeeded"] = true;
       }
       else
