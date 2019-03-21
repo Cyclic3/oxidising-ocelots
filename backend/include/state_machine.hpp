@@ -141,9 +141,9 @@ namespace oxidisingocelots {
     }
     void finish() {
       // Required as f.finish will modify pos
-      auto pos = f.pos;
+      auto id = players[f.pos].id;
       f.finish();
-      deal(f.draw_next(deck), pos);
+      deal(f.draw_next(deck), id);
     }
     player& get_player(player_id id) {
       auto iter = std::find(players.begin(), players.end(), id);
