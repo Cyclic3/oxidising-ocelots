@@ -49,15 +49,19 @@ namespace oxidisingocelots {
       last_step = t.first;
 
       if (last_step == 0)
-            return;
+          return;
       else if (last_step > 0) {
-        pos += n_players;
+        pos += last_step;
+        pos %= n_players;
       }
       else {
-        if (pos == 0)
-          pos = n_players - 1;
+        size_t last_step_mag = std::abs(last_step);
+        last_step_mag %= n_players;
+        if (last_step_mag > pos) {
+          pos += (n_players - last_step_mag);
+        }
         else
-          --pos;
+          pos -= last_step_mag;
       }
     }
 
