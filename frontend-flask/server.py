@@ -1,6 +1,6 @@
 try:
 	from flask import Flask, abort, render_template, redirect, make_response, url_for, flash, request
-	from flask_socketio import SocketIO
+	from flask_socketio import SocketIO, join_room, leave_room
 
 except:
 	while True:
@@ -19,13 +19,19 @@ USER_TIMEOUT = 10
 def checkAlive(sleeper):
 	time.sleep(sleeper)
 	global activeList, oldList
-	oldList = activeList
-	activeList = []
+
+	print (oldList)
+	print (activeList)
+
+
 	socketio.emit('AreYouAlive')
 
 	print ("Poll sent")
 		
-	time.sleep(sleeper)		
+	time.sleep(sleeper)	
+
+	print (oldList)
+	print (activeList)	
 
 	if len(oldList) == 0:
 		joinedUsers = activeList
@@ -35,6 +41,7 @@ def checkAlive(sleeper):
 		joinedUsers = []
 
 	else:
+		print ('new thing')
 		joinedUsers = list(set(oldList)-set(activeList))
 		leftUsers = list(set(oldList)-set(activeList))
 
@@ -44,13 +51,18 @@ def checkAlive(sleeper):
 				if user in rooms[room].activeRoomUsers:
 					rooms[room].RemoveActiveUserFromRoom(user)
 
+	oldList = activeList
+	activeList = []
 	return('New Users:' +str(joinedUsers)+ '.  users who have left:' +str(leftUsers))
 
 
 def checkAliveCycle(debug):
+	global activeList, oldList
 	if debug:
 		print('auto polling not active while in debug mode. Please run server with debug = False')
 		return
+	activeList = []
+	oldList = []
 	while True:
 		print (checkAlive(USER_TIMEOUT))
 
@@ -62,7 +74,15 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 300
 socketio = SocketIO(app)
 
 
+@app.route("/test/<cid>/<message>")
+def tester1234(cid, message):
 
+	jsonData = {
+	'user_name': 'admin',
+	'message': message+cid
+	}
+	socketio.emit('ActionResponse', jsonData, callback=messageReceived, room=cid)
+	return ('yeet')
 
 @app.route("/", methods = ["GET","POST"])
 def home():
@@ -155,6 +175,11 @@ def room(roomRefrence):
 	return render_template('room.html', userData = userData)
 
 
+########################################################################################################################
+
+def messageReceived(methods=['GET', 'POST']):
+    print('message was received!!!')
+
 
 @socketio.on('IAmAlive')
 def amAliveNotification():
@@ -162,18 +187,9 @@ def amAliveNotification():
 	activeList.append(request.cookies.get('userID'))
 
 
-def messageReceived(methods=['GET', 'POST']):
-    print('message was received!!!')
-
-
 @socketio.on('connect')
 def on_connect():
-	activeList.append(request.cookies.get('userID'))
-	jsonData = {
-	'user_name': sanitiseInput(request.cookies.get('username')),
-	'message': '<b><i>User Connected</i></b>'
-	}
-	socketio.emit('ActionResponse', jsonData, callback=messageReceived)
+	pass
 
 @socketio.on('disconnect')
 def on_disconnect():
@@ -190,17 +206,28 @@ def on_disconnect():
 @socketio.on('registerToRoom')
 def regsiterToRoom(data, methods=['GET', 'POST']):
 	userData = (request.cookies.get('username'), sanitiseInput(request.cookies.get('userID')), listRooms())
+	activeList.append(data['userID'])
 
 	lis = (request.sid)
+	print (lis)
 
+	join_room(data['roomID'])
 
 	roomRefrence = (data['roomID'])
 	currentRoom = rooms.get(roomRefrence)
 	currentRoom.activeRoomUsers[userData[1]] = (lis)
 
+	jsonData = {
+	'user_name': sanitiseInput(request.cookies.get('username')),
+	'message': '<b><i>User Connected</i></b>'
+	}
+
+	
+	socketio.emit('ActionResponse', jsonData, callback=messageReceived, room=data['roomID'])
+
 
 @socketio.on('ActionHappened')
-def handle_my_custom_event(jsonData, methods=['GET', 'POST']):
+def nonUserAction(jsonData, methods=['GET', 'POST']):
 
 	print (jsonData)
 	jsonData['username'] = request.cookies.get('username')
@@ -213,7 +240,23 @@ def handle_my_custom_event(jsonData, methods=['GET', 'POST']):
 		jsonData['message'] = ("<b><i>"+jsonData.pop('messageBold')+"</i></b>")
 
 
-	socketio.emit('ActionResponse', jsonData, callback=messageReceived)
+	socketio.emit('ActionResponse', jsonData, callback=messageReceived, room=jsonData['roomID'])
+
+
+
+@socketio.on('userAction')
+def userAction(jsonData, methods=['GET', 'POST']):
+	print ("\n\n\n")
+	print (jsonData)
+	print ("\n\n\n")
+	StartGame(jsonData['roomID'])
+
+########################################################################################################################
+
+
+def StartGame(room):
+	if room in rooms:
+		print (rooms[room])
 
 
 
@@ -267,6 +310,17 @@ class game_room:
 #####
 GetRid = game_room('lukshans room')
 #####
+
+
+@app.route('/enablepoll')
+def enablePoll():
+	if debug:
+		Thread(target = checkAliveCycle, args =(False,) ).start()
+		return redirect(url_for('home'))
+	else:
+		print ('aborting')
+		abort()
+
 
 
 if __name__ == '__main__':
