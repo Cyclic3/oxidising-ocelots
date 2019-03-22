@@ -33,7 +33,7 @@ namespace oxidisingocelots {
 
   OCELOT_HANDLER(kill, "Remove `player`", obj, s) {
     REQUIRE_STATE(s);
-    s.s->kill(static_cast<player_id>(obj.get_child("player").as<c3::nu::obj_struct::int_t>()));
+    s.s->kill(static_cast<player_id>(obj.get_child("player").as<std::string>()));
 
     return {};
   }
@@ -41,7 +41,7 @@ namespace oxidisingocelots {
   OCELOT_HANDLER(init, "Reset the state, with given `players` as an array of player ids", obj, s) {
     std::vector<player> players;
     for (auto i : obj.get_child("players").as<c3::nu::obj_struct::arr_t>())
-      players.emplace_back(i.as<c3::nu::obj_struct::int_t>());
+      players.emplace_back(i.as<std::string>());
     s.s = std::make_unique<state>(std::move(players));
     return {};
   }
@@ -54,8 +54,8 @@ namespace oxidisingocelots {
     ret["goes_left"] = s.s->f.goes_left;
     {
       auto& players = ret["players"];
-      for (auto& i :s.s->players) {
-        auto& p = players[std::to_string(i.id)];
+      for (auto& i : s.s->players) {
+        auto& p = players[i.id];
         auto& priv = p["hand"].as<c3::nu::obj_struct::arr_t>();
         for (auto card : i.hand)
           priv.push_back(static_cast<int>(card));
@@ -77,7 +77,7 @@ namespace oxidisingocelots {
     card c = static_cast<card>(obj.get_child("card").as<c3::nu::obj_struct::int_t>());
     player_id id;
     if (auto id_ptr = obj.try_get_child("player"))
-      id = id_ptr->as<c3::nu::obj_struct::int_t>();
+      id = id_ptr->as<std::string>();
     else
       id =s.s->current_player().id;
 

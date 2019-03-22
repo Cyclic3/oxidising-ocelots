@@ -68,7 +68,7 @@ namespace oxidisingocelots {
         current_player().pick_up(target->take_random_card());
       } break;
       case (card::Mug): {
-        auto& target = get_player(params.get_child("target").as<c3::nu::obj_struct::int_t>());
+        auto& target = get_player(params.get_child("target").as<std::string>());
         current_player().pick_up(target.take_random_card());
       } break;
       case (card::Defer): {

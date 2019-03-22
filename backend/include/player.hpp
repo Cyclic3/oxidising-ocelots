@@ -6,7 +6,7 @@
 #include "card.hpp"
 
 namespace oxidisingocelots {
-  using player_id = uint32_t;
+  using player_id = std::string;
 
   struct future_grab {
     std::vector<card> observed;
