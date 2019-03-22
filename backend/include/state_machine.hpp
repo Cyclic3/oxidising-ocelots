@@ -47,6 +47,18 @@ namespace oxidisingocelots {
       if (t.second == clearup::Reset)
         reset_step();
       last_step = t.first;
+
+      if (last_step == 0)
+            return;
+      else if (last_step > 0) {
+        pos += n_players;
+      }
+      else {
+        if (pos == 0)
+          pos = n_players - 1;
+        else
+          --pos;
+      }
     }
 
   private:

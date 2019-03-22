@@ -126,7 +126,7 @@ namespace oxidisingocelots {
   std::string state_machine_api::handle(std::string_view str) {
     c3::nu::obj_struct ret;
 
-    try {
+//    try {
       c3::nu::obj_struct input = c3::nu::json_decode(str);
       const std::string& action = input.get_child("action").as<std::string>();
       if (auto iter = funcs.find(action); iter != funcs.end()) {
@@ -135,13 +135,13 @@ namespace oxidisingocelots {
       }
       else
         throw std::runtime_error("Requested action not found");
-    }
-    catch(std::exception& exn) {
-      ret["succeeded"] = false;
-      ret["result"] = std::string(exn.what());
-      if (debug)
-        throw;
-    }
+//    }
+//    catch(std::exception& exn) {
+//      ret["succeeded"] = false;
+//      ret["result"] = std::string(exn.what());
+//      if (debug)
+//        throw;
+//    }
 
 
     return c3::nu::json_encode(ret);
