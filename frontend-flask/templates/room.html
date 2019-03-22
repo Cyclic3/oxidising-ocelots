@@ -13,12 +13,15 @@
             </div>
 
             <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
-            <div class="message_holder"></div>
+            <div class="userDisplay"></div>
 
             <form action="" method="POST">
                 <input type="text" class="message" placeholder="Messages"/>
                 <input type="submit"/>
             </form>
+
+
+            <button onclick="userButtonAction('TestClick')">test</button>
             <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -39,26 +42,37 @@
                     }
                     return "";
                 }
+                var currentRoom = (window.location.pathname).substr(6);
+                var userID = getCookie("userID")
+                var userName = getCookie("username")
 
                 var socket = io.connect('http://' + document.domain + ':' + location.port);
 
                 socket.on( 'connect', function() {
-                    var userID = getCookie("userID")
-                    var currentRoom = (window.location.pathname).substr(6);
                     socket.emit( 'registerToRoom', {
-                        roomID: currentRoom
+                        roomID: currentRoom,
+                        userID: userID
                         } )
+
+
                     var form = $( 'form' ).on( 'submit', function( e ) {
                         e.preventDefault()
                         let user_input = $( 'input.message' ).val()
                         socket.emit( 'ActionHappened', {
-                            message : user_input
+                            message : user_input,
+                            roomID: currentRoom,
                         } )
                         $( 'input.message' ).val( '' ).focus()
                     } )
                 } )
 
-
+                function userButtonAction(action) {
+                    socket.emit('userAction',{
+                        action: action,
+                        roomID: currentRoom,
+                        userID: userID
+                    })
+                }
 
 
 
@@ -66,7 +80,7 @@
                     console.log( msg )
                     if( typeof msg.user_name !== 'undefined' ) {
                         $( 'h3' ).remove()
-                        $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
+                        $( 'div.userDisplay' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
                     }
                 })
 
