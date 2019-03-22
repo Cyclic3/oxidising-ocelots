@@ -45,8 +45,10 @@
                 var currentRoom = (window.location.pathname).substr(6);
                 var userID = getCookie("userID")
                 var userName = getCookie("username")
+                console.log(window.location.origin)
 
-                var socket = io.connect('http://' + document.domain + ':' + location.port);
+                //var socket = io.connect('http://' + document.domain + ':' + location.port);
+                var socket = io.connect(window.location.origin)
 
                 socket.on( 'connect', function() {
                     socket.emit( 'registerToRoom', {
