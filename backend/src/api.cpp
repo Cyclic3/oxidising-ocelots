@@ -103,13 +103,14 @@ namespace oxidisingocelots {
     return card_names[c];
   }
 
-  OCELOT_HANDLER(cards, "Get a list of cards names, their ids, and their parameters", _1, _2) {
+  OCELOT_HANDLER(cards, "Get a list of cards names, their descriptions, their ids, and their parameters", _1, _2) {
     (void)_1,(void)_2;
     c3::nu::obj_struct ret;
 
     for (auto i : card_names) {
       auto& c = ret[i.second];
       c["id"] = static_cast<c3::nu::obj_struct::int_t>(i.first);
+      c["desc"] = card_descs.at(i.first);
       auto& params = c["params"];
       for (auto param : card_params.at(i.first))
         params[param.first] = param.second;

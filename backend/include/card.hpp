@@ -24,6 +24,8 @@ namespace oxidisingocelots {
 
   extern std::map<card, std::string> card_names;
 
+  extern std::map<card, std::string> card_descs;
+
   extern std::map<card, std::map<std::string, std::string>> card_params;
 
   extern std::vector<card> initial_deck;

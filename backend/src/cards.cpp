@@ -6,6 +6,7 @@
 #define OCELOT_ADD_CARD(CARD, NAME, COUNT, DESC) \
   inline int _##CARD##_init() { \
     card_names.emplace(card::CARD, NAME); \
+    card_descs.emplace(card::CARD, DESC); \
     initial_deck.insert(initial_deck.end(), COUNT, card::CARD); \
     card_params[card::CARD] = {}; \
     return 0; \
@@ -19,6 +20,7 @@ namespace oxidisingocelots {
   std::map<card, std::string> card_names;
   std::vector<card> initial_deck;
   std::map<card, std::map<std::string, std::string>> card_params;
+  std::map<card, std::string> card_descs;
 
   OCELOT_ADD_CARD(OxidisingOcelot, "Oxidising Ocelot", 0, "Kills you")
   OCELOT_ADD_CARD(Defuse, "Defuse", 0, "Replaces the ocelot into a random positiondeck")
