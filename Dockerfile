@@ -1,4 +1,4 @@
-FROM oxidising-ocelots-base
+FROM cyclic3/oxidising-ocelots-base
 COPY . /opt/ocelots
 RUN /opt/ocelots/backend/build.sh /opt/ocelots/oo-backend
 WORKDIR /opt/ocelots/frontend-flask
