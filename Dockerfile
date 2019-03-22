@@ -4,5 +4,5 @@ RUN pip3 install flask flask-socketio
 COPY . /opt/ocelots
 RUN /opt/ocelots/backend/build.sh /opt/ocelots/oo-backend
 WORKDIR /opt/ocelots/frontend-flask
-ENTRYPOINT python3 server.py
+ENTRYPOINT python3 server.py /opt/ocelots/frontend-flask
 
