@@ -1,5 +1,5 @@
 <!-- calling template -->
-{% extends "Layout/layout.html" %}
+{% extends "layout/layout.html" %}
 
 
 {% block _content_ %}
@@ -16,7 +16,6 @@
             <div class="message_holder"></div>
 
             <form action="" method="POST">
-                <input type="text" class="username" placeholder="User Name"/>
                 <input type="text" class="message" placeholder="Messages"/>
                 <input type="submit"/>
             </form>
@@ -25,32 +24,59 @@
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
             <script type="text/javascript">
+                function getCookie(cname) {
+                    var name = cname + "=";
+                    var decodedCookie = decodeURIComponent(document.cookie);
+                    var ca = decodedCookie.split(';');
+                    for(var i = 0; i < ca.length; i++) {
+                        var c = ca[i];
+                        while (c.charAt(0) == ' ') {
+                            c = c.substring(1);
+                        }
+                        if (c.indexOf(name) == 0) {
+                            return c.substring(name.length, c.length);
+                        }
+                    }
+                    return "";
+                }
+
                 var socket = io.connect('http://' + document.domain + ':' + location.port);
+
                 socket.on( 'connect', function() {
-                    socket.emit( 'chat', {
-                        data: 'User Connected'
-                    } )
+                    var userID = getCookie("userID")
+                    var currentRoom = (window.location.pathname).substr(6);
+                    socket.emit( 'registerToRoom', {
+                        roomID: currentRoom
+                        } )
                     var form = $( 'form' ).on( 'submit', function( e ) {
                         e.preventDefault()
-                        let user_name = $( 'input.username' ).val()
                         let user_input = $( 'input.message' ).val()
-                        socket.emit( 'my event', {
-                            user_name : user_name,
+                        socket.emit( 'ActionHappened', {
                             message : user_input
                         } )
                         $( 'input.message' ).val( '' ).focus()
                     } )
                 } )
-                socket.on( 'my response', function( msg ) {
+
+
+
+
+
+                socket.on( 'ActionResponse', function( msg ) {
                     console.log( msg )
                     if( typeof msg.user_name !== 'undefined' ) {
                         $( 'h3' ).remove()
                         $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
                     }
                 })
+
+                socket.on( 'AreYouAlive', function() {
+                    socket.emit( 'IAmAlive')
+                })
+
             </script>
 
-            
+
 
         </div>
     </section>
