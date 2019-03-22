@@ -26,6 +26,8 @@ namespace oxidisingocelots {
     size_t goes_left = 1;
     ssize_t last_step = 1;
 
+    size_t go = 0;
+
   public:
     decltype(pos) random();
 
@@ -68,10 +70,8 @@ namespace oxidisingocelots {
   private:
     // returns the next player goes, and whether the flow_modifier should be kept
     std::function<std::pair<size_t, clearup>()> _next_player_goes;
-    static std::pair<card, clearup> default_draw(std::deque<card>& cs) {
-      auto ret = cs.front();
-      cs.pop_front();
-      return { ret, clearup::Keep };
+    static std::pair<size_t, clearup> default_player_goes() {
+      return { 1, clearup::Keep };
     }
   public:
     void reset_next_player_goes(std::function<std::pair<size_t, clearup>()> f = default_player_goes) {
@@ -88,8 +88,10 @@ namespace oxidisingocelots {
   private:
     // returns the card, and whether the flow_modifier should be kept
     std::function<std::pair<card, clearup>(std::deque<card>&)> _draw_next;
-    static std::pair<size_t, clearup> default_player_goes() {
-      return { 1, clearup::Keep };
+    static std::pair<card, clearup> default_draw(std::deque<card>& cs) {
+      auto ret = std::move(cs.front());
+      cs.pop_front();
+      return { std::move(ret), clearup::Keep };
     }
   public:
     void reset_draw(std::function<std::pair<card, clearup>(std::deque<card>&)> f = default_draw) {
@@ -123,6 +125,11 @@ namespace oxidisingocelots {
     inline player& current_player() { return players[f.pos]; }
     inline player& random_player() { return players[f.random()]; }
   private:
+    inline future_grab grab(size_t n) {
+      auto n_to_copy = std::min(deck.size(), n);
+      auto end = deck.begin() + n_to_copy;
+      return { std::vector(deck.begin(), end), f.go };
+    }
     inline card _take_top() {
       auto ret = deck.front();
       deck.pop_front();
@@ -148,8 +155,8 @@ namespace oxidisingocelots {
   public:
     player kill(player_id);
     void shuffle();
-    void play(card&& c, const c3::nu::obj_struct& params = {});
-    void deal(card&& c, player_id id) {
+    void play(card c, const c3::nu::obj_struct& params = {});
+    void deal(card c, player_id id) {
       if (c == card::OxidisingOcelot)
         _oxidise(id);
       else

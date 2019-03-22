@@ -8,10 +8,6 @@ int main() {
   state_machine_api s;
 
   s.debug = true;
-
-  s.handle(R"({"action":"init", "players":[1,2,3]})");
-  s.handle(R"({"action":"finish"})");
-
   try {
     std::string line;
     while(std::getline(std::cin, line))

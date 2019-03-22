@@ -18,7 +18,8 @@ namespace oxidisingocelots {
     ErraticElephant,
     Steal,
     Mug,
-    Defer
+    Defer,
+    Scry
   };
 
   extern std::map<card, std::string> card_names;

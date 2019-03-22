@@ -59,10 +59,13 @@ namespace oxidisingocelots {
         auto& priv = p["hand"].as<c3::nu::obj_struct::arr_t>();
         for (auto card : i.hand)
           priv.push_back(static_cast<int>(card));
-/*
-        auto& pub = p["revealed_hand"].as<c3::nu::obj_struct::arr_t>();
-        for (auto card : i.revealed_hand)
-          pub.push_back(static_cast<int>(card));*/
+        auto& fut = p["last_grab"];
+        if (i.last_grab) {
+          fut["go"] = i.last_grab->go;
+          auto& fut_obs = fut["observed"].as<c3::nu::obj_struct::arr_t>();;
+          for (auto card : i.last_grab->observed)
+            fut_obs.push_back(static_cast<int>(card));
+        }
       }
     }
 
@@ -82,9 +85,9 @@ namespace oxidisingocelots {
 
     if (auto iter = player.hand.find(c); iter != player.hand.end()) {
       if (auto params = obj.try_get_child("params"))
-        s.s->play(std::move(c), *params);
+        s.s->play(c, *params);
       else
-        s.s->play(std::move(c));
+        s.s->play(c);
     }
     else
       throw std::runtime_error("Player does not have the requested card");

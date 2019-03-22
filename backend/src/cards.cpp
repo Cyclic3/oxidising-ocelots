@@ -3,7 +3,7 @@
 
 #include "rng.hpp"
 
-#define OCELOT_ADD_CARD(CARD, NAME, COUNT) \
+#define OCELOT_ADD_CARD(CARD, NAME, COUNT, DESC) \
   inline int _##CARD##_init() { \
     card_names.emplace(card::CARD, NAME); \
     initial_deck.insert(initial_deck.end(), COUNT, card::CARD); \
@@ -20,21 +20,23 @@ namespace oxidisingocelots {
   std::vector<card> initial_deck;
   std::map<card, std::map<std::string, std::string>> card_params;
 
-  OCELOT_ADD_CARD(OxidisingOcelot, "Oxidising Ocelot", 0)
-  OCELOT_ADD_CARD(Defuse, "Defuse", 0)
-  OCELOT_ADD_CARD(Skip, "Skip", 4)
-  OCELOT_ADD_CARD(Attack, "Attack", 4)
-  OCELOT_ADD_CARD(Reverse, "Reverse", 4)
-  OCELOT_ADD_CARD(ErraticElephant, "Erratic Elephant", 4)
-  OCELOT_ADD_CARD(Steal, "Steal", 4)
-  OCELOT_ADD_CARD(Shuffle, "Shuffle", 4)
+  OCELOT_ADD_CARD(OxidisingOcelot, "Oxidising Ocelot", 0, "Kills you")
+  OCELOT_ADD_CARD(Defuse, "Defuse", 0, "Replaces the ocelot into a random positiondeck")
+  OCELOT_ADD_CARD(Skip, "Skip", 4, "Finishes your turn without drawing");
+  OCELOT_ADD_CARD(Attack, "Attack", 4, "Makes the next player have two goes")
+  OCELOT_ADD_CARD(Reverse, "Reverse", 4, "Flips the order of play")
+  OCELOT_ADD_CARD(ErraticElephant, "Erratic Elephant", 4, "Finishes your turn without drawing, and play jumps to a random point")
+  OCELOT_ADD_CARD(Steal, "Steal", 4, "Steals a random card from a random player");
+  OCELOT_ADD_CARD(Shuffle, "Shuffle", 4, "Shuffles the deck");
 
-  OCELOT_ADD_CARD(Defer, "Defer", 4)
+  OCELOT_ADD_CARD(Defer, "Defer", 4, "Moves all of your remaining goes to the next player, and finishes your turn without drawing")
 
-  OCELOT_ADD_CARD(Mug, "Mug", 4)
+  OCELOT_ADD_CARD(Mug, "Mug", 4, "Steals a random card from a specific player");
   OCELOT_ADD_PARAM(Mug, "target", "The player ID of the targeted player")
 
-  void state::play(card&& c, const c3::nu::obj_struct& params) {
+  OCELOT_ADD_CARD(Scry, "Scry", 4, "For each player still playing, view the next top card");
+
+  void state::play(card c, const c3::nu::obj_struct& params) {
     switch (c) {
       case (card::Skip): {
         // Skip us
@@ -71,6 +73,10 @@ namespace oxidisingocelots {
       } break;
       case (card::Defer): {
         f.reset_next_player_goes([=]() { return std::pair{ f.goes_left, clearup::Reset }; });
+        f.finish();
+      } break;
+      case (card::Scry): {
+        current_player().last_grab = grab(f.n_players);
       } break;
       default:
         throw std::runtime_error("Invalid card");

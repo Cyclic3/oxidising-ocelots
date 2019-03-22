@@ -8,11 +8,21 @@
 namespace oxidisingocelots {
   using player_id = uint32_t;
 
+  struct future_grab {
+    std::vector<card> observed;
+    size_t go;
+
+    inline future_grab(decltype(observed) observed, decltype(go) go) :
+      observed{std::move(observed)}, go{go} {}
+  };
+
   class player {
   public:
     player_id id;
     std::multiset<card> hand;
-    //std::multiset<card> revealed_hand = {};
+
+    std::optional<future_grab> last_grab;
+
 
   private:
     /*inline void _reveal_card(card&& c) {

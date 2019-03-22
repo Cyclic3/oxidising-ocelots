@@ -2,19 +2,10 @@
 
 namespace oxidisingocelots {
   void flow::finish() {
-    if (--goes_left != 0)
-      return;
+    ++go;
 
-    step();
-
-    if (pos >= n_players)
-      // Provide helpful and thoughtful error message
-      throw std::runtime_error("LUKSHAN YOU MESSED UP "
-                               "THEY'RE TRYING TO HACK ME WITH PLAYER BOUNDS");
-
-    // Check the next player actually has some goes
-    if ((goes_left = next_player_goes()) == 0)
-      finish();
+    while (goes_left == 0)
+      step();
   }
   player state::kill(player_id id) {
     auto iter = std::find(players.begin(), players.end(), id);
