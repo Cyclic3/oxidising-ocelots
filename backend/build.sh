@@ -19,9 +19,9 @@ cd build
 {
 	cmake "$SOURCEDIR" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="$BASEDIR/build/nu"
 	cmake --build .
-	cp *oxidising-ocelots-backend* ..
+	cp *oxidising-ocelots-backend* $1
 	cd $BASEDIR
 	rm -rf build
 }
 
-echo Binary is in $BASEDIR
+rm -rf $BASEDIR
