@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<!-- Required meta tags for the responsiveness of the website especially for mobile phones -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->  <!-- using Bootstrap's css as it produces a very nice text layout-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/static/main.css">
+
+
+	<title>Oxidising Ocelots</title>
+
+
+	<link rel="shortcut icon" type="image/png" href="static/favicon.png">
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src='https://www.google.com/recaptcha/api.js'></script>
+</head>
+<body>
+
+
+	<!--Navbar-->
+	<header>
+		<h1 class="ATS_title"><span style="color: red">Oxidising</span> Ocelots</h1>
+	</header>
+	<nav>
+		<div class="nav-handle" style="padding-top: 0p">
+			<span>
+				<div class="bar1 nav-handle-icon change"></div>
+				<div class="bar2 nav-handle-icon"></div>
+				<div class="bar3 nav-handle-icon"></div>
+			</span>
+			<div style="position:relative; left: 40px; bottom: 15px; font-size: 1.2em;">Navbar</div>
+		</div>
+		<ul>
+			<a href="/"><li>Home</li></a>
+			<a href="/create_room_page"><li>Make room (Server Host only)</li></a>
+
+			<a><li class="rightlast username-box"></li></a>
+		</ul>
+	</nav>
+
+
+	<!--sidebar-->
+	<main role="main" class="container" style="position:relative; top:20px;">
+          <p><h3>Why?</h3></p>
+          Our school banned playing card games in school. We looked at a range of solutions:
+          <ul>
+          <li>Remote controlled robots with cameras, so we weren't technically playing in</li>
+          <li>Other games which could be reduced to cards through a polynomial-time reduction</li>
+          <li>A military coo</li>
+          <li><s>Actually do some work</s></li>
+          </ul>
+          We eventually settled on writing our own.
+
+          This was initially supposed to be a significantly less good version of exploding kittens,
+          our favourite card game, but we realised it would be too hard.
+
+          Instead, we have ripped out all of the fun strategy for a Turing-complete flow control.
+
+          And I mean turing-complete. When a player leaves, we have to reset flow,
+          or else we have to solve the halting problem.
+
+          <br><br>
+          <p><h3>How?</h3></p>
+          This was carefully crafted in a beautiful flow of Rust, Go and Javascript,
+          for safety, high speeds and code clarity.
+
+          The code interfaces using high performance asynchronous socket io.
+          <br><br>
+
+          Lol jk, we hacked it together in C++ and Python, and data is passed as json over stdio
+          because sockets are hard.
+
+          <br><br>
+
+          If you actually want to help, or just want to laugh at awfully indented code with more whitespace
+          than text (Lukshan), or a C++ backend that cannot be truely understood by any sane mortal,
+          and may actually be cursed by Satan himself (Cyclic3),
+          visit our <a href="https://github.com/Cyclic3/oxidising-ocelots">github</a>.
+
+          <br><br>
+
+          The develop and master branches are autobuilt on push,
+          and are pushed to the <a href="https://beta.oxidisingocelots.co.uk/">beta</a> and
+          <a href="https://www.oxidisingocelots.co.uk/">production</a> domains.
+
+          <br>
+
+          Everything is hosted on a hacked together kuberentes cluster,
+          which is built from laptops and cobbled together bits of old computer.
+	</main>
+
+	<script>
+		$(document).ready(function(){
+			$('.nav-handle').on('click', function(){
+				$('nav ul').toggleClass('when-showing');
+				$()
+			});
+		});
+
+	</script>
+	<div style="color: #eeeeff;position:relative;top: 60px;text-align: center;">Developed By Lukshan Sharvaswaran and Cyclic3, 2017-2019. @lukshan13, Cyclic3. Licenced under GLU v3.0. </div>
+</body>
+</html>
