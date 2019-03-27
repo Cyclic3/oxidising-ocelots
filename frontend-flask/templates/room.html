@@ -3,7 +3,7 @@
 
 
 {% block _content_ %}
-<h3>Generate room</h3>
+
 
     <section class="media content-section">
         <div class="media-body">
@@ -12,16 +12,16 @@
                 <small class="text-muted"></small>
             </div>
 
-            <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
+            <h3  id='noMessageText' style='color: #ccc;font-size: 30px;'>No response yet...</h3>
             <div class="userDisplay"></div>
 
-            <form action="" method="POST">
-                <input type="text" class="message" placeholder="Messages"/>
+            <form id='commandForm' style="display: none;" action="" method="POST">
+                <input type="text" class="message" placeholder="Command"/>
                 <input type="submit"/>
             </form>
 
 
-            <button onclick="userButtonAction('TestClick')">test</button>
+            <div id='rightButtons' style="position: relative; float: right;" ><button id='voteToStartBtn' onclick="userButtonAction('VoteToStart')">Vote to start</button></div>
             <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -63,6 +63,7 @@
                         socket.emit( 'ActionHappened', {
                             message : user_input,
                             roomID: currentRoom,
+                            userID: userID
                         } )
                         $( 'input.message' ).val( '' ).focus()
                     } )
@@ -78,11 +79,13 @@
 
 
 
-                socket.on( 'ActionResponse', function( msg ) {
+                socket.on( 'MessageResponse', function( msg ) {
                     console.log( msg )
                     if( typeof msg.user_name !== 'undefined' ) {
-                        $( 'h3' ).remove()
+                        //$( 'h3' ).remove()
+                        document.getElementById('noMessageText').style.display = "none";
                         $( 'div.userDisplay' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
+                        window.scrollTo(0,document.body.scrollHeight);
                     }
                 })
 
@@ -90,10 +93,28 @@
                     socket.emit( 'IAmAlive')
                 })
 
+                socket.on( 'startGame', function() {
+                    console.log('Game will start')
+                    {
+                        //$( 'h3' ).remove()
+                        document.getElementById('noMessageText').style.display = "none";
+                        $( 'div.userDisplay' ).append( '<div><b style="color: #000">'+'Server'+'</b> '+'Game is starting!!'+'</div>' )
+                    }
+                    {
+                        document.getElementById('voteToStartBtn').remove();
+                        document.getElementById('commandForm').style.display = "block"
+                    }
+                })
+
+                socket.on( 'ReloadPage', function() {
+                    console.log('yeet')
+                    location.reload();
+                })
             </script>
-
-
-
         </div>
     </section>
+
+
+
+
 {% endblock _content_ %}

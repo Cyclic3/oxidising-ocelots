@@ -105,6 +105,32 @@
 				</div>		
 			</div>
 			{% endif %}
+
+			{% if helpbar %}
+		    <div class="col-md-4">
+				<div class="content-section">
+					<h3>Commands</h3>
+						<ul class="list-group">
+							<table>
+								<tr>
+									<th>Command</th>
+									<th>Task</th>
+								</tr>
+								{% for command in commands %}
+										<tr>
+											<td>{{command}}</td>
+											<td>{{commands[command]}}</td>
+										</tr>
+									</li></a>
+								{% endfor %}
+							</table>
+						</ul>
+				</div>		
+			</div>
+			{% endif %}
+
+
+
 	  </div>
 	</main>
 

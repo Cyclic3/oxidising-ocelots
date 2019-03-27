@@ -1,5 +1,5 @@
 try:
-	from flask import Flask, abort, render_template, redirect, make_response, url_for, flash, request
+	from flask import Flask, abort, render_template, redirect, make_response, url_for, flash, request, escape
 	from flask_socketio import SocketIO, join_room, leave_room
 
 except:
@@ -9,16 +9,18 @@ import re, json, time
 from threading import Thread
 rooms = {}
 
+import OcelotManager
+
 
 oldList = activeList = []
 USER_TIMEOUT = 10
 
 
 
-
 def checkAlive(sleeper):
 	time.sleep(sleeper)
 	global activeList, oldList
+
 
 	print (oldList)
 	print (activeList)
@@ -28,10 +30,18 @@ def checkAlive(sleeper):
 
 	print ("Poll sent")
 		
-	time.sleep(sleeper)	
+	time.sleep(sleeper)
 
 	print (oldList)
 	print (activeList)	
+
+	oldList = list(set(oldList))
+	activeList = list(set(activeList))
+
+
+	print (oldList)
+	print (activeList)	
+
 
 	if len(oldList) == 0:
 		joinedUsers = activeList
@@ -42,8 +52,8 @@ def checkAlive(sleeper):
 
 	else:
 		print ('new thing')
-		joinedUsers = list(set(oldList)-set(activeList))
 		leftUsers = list(set(oldList)-set(activeList))
+		joinedUsers = list(set(activeList)-set(oldList))
 
 	if not leftUsers == []:
 		for room in rooms:
@@ -74,6 +84,14 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 300
 socketio = SocketIO(app)
 
 
+gameChatCommands = {
+'/cardlist': 'Show all cards',
+'/takecard': 'Take a card from stack and finish your turn',
+'/playcard *card*': 'Play the card that you have chosen'
+}
+
+
+
 @app.route("/test/<cid>/<message>")
 def tester1234(cid, message):
 
@@ -81,7 +99,7 @@ def tester1234(cid, message):
 	'user_name': 'admin',
 	'message': message+cid
 	}
-	socketio.emit('ActionResponse', jsonData, callback=messageReceived, room=cid)
+	socketio.emit('MessageResponse', jsonData, callback=messageReceived, room=cid)
 	return ('yeet')
 
 @app.route("/", methods = ["GET","POST"])
@@ -97,6 +115,10 @@ def home():
 		if not userData[0] and not userData[1]:
 			return render_template("Home.html", userData = userData, askUsername = True, sidebar = True, printRef = True)
 		else:
+			try:
+				int(userData[1])
+			except:
+				return redirect('refreshID')
 			return render_template("Home.html", userData = userData, askUsername = False, sidebar = True, printRef = True)
 
 
@@ -163,16 +185,20 @@ def room(roomRefrence):
 	if not roomRefrence in rooms:
 		flash('That room cannot be found','warning')
 		return redirect(url_for('home'))
+	
 
-	userData = (request.cookies.get('username'), sanitiseInput(request.cookies.get('userID')), listRooms())
+	if rooms[roomRefrence].activeGame and (not userData[1] in rooms[roomRefrence].allactiveRoomUsers):
+		print (userData)
+		flash("This game is now active and you cannot join anymore", 'warning')
+		return redirect(url_for('home'))
 
 
 	for room in rooms:
 		print (rooms[room].activeRoomUsers)
-		if userData[1] in rooms[room].activeRoomUsers:
+		if userData[1] in rooms[room].activeRoomUsers and not debug:
 			flash("You appear to already be in a room. Perhaps you are in another tab? If you have just left a game, please wait upto 10 seconds before trying to connect", 'warning')
 			return redirect(url_for('home'))
-	return render_template('room.html', userData = userData)
+	return (render_template('room.html', userData = userData, helpbar = True, commands=gameChatCommands))
 
 
 ########################################################################################################################
@@ -191,16 +217,6 @@ def amAliveNotification():
 def on_connect():
 	pass
 
-@socketio.on('disconnect')
-def on_disconnect():
-
-    jsonData = {
-    'user_name': sanitiseInput(request.cookies.get('username')),
-    'message': '<b><i>User Disconnected</i></b>'
-    }
-
-    print ('\n\nuserdisconnected\n\n')
-    socketio.emit('ActionResponse', jsonData, callback=messageReceived)
 
 
 @socketio.on('registerToRoom')
@@ -209,13 +225,12 @@ def regsiterToRoom(data, methods=['GET', 'POST']):
 	activeList.append(data['userID'])
 
 	lis = (request.sid)
-	print (lis)
 
 	join_room(data['roomID'])
 
 	roomRefrence = (data['roomID'])
 	currentRoom = rooms.get(roomRefrence)
-	currentRoom.activeRoomUsers[userData[1]] = (lis)
+	currentRoom.activeRoomUsers[str(userData[1])] = (lis)
 
 	jsonData = {
 	'user_name': sanitiseInput(request.cookies.get('username')),
@@ -223,40 +238,50 @@ def regsiterToRoom(data, methods=['GET', 'POST']):
 	}
 
 	
-	socketio.emit('ActionResponse', jsonData, callback=messageReceived, room=data['roomID'])
+	socketio.emit('MessageResponse', jsonData, callback=messageReceived, room=data['roomID'])
 
 
 @socketio.on('ActionHappened')
 def nonUserAction(jsonData, methods=['GET', 'POST']):
 
 	print (jsonData)
-	jsonData['username'] = request.cookies.get('username')
-	jsonData['user_name'] = request.cookies.get('username')
 
-	for i in jsonData:
-		jsonData[i] = sanitiseInput(jsonData[i])
+	if jsonData['message'].lower() == '/cardlist':
+		jsonResponse = {
+		'user_name': 'server',
+		'message': 'would get a list of all cards here'
+		}
 
-	if 'messageBold' in jsonData:
-		jsonData['message'] = ("<b><i>"+jsonData.pop('messageBold')+"</i></b>")
+	elif jsonData['message'].lower() == '/takecard':
+		rooms[jsonData['roomID']].dumpAndSend()
+		jsonResponse = {
+		'user_name': 'server',
+		'message': 'card taken'
+		}
+
+	elif jsonData['message'][:9].lower() == '/playcard':
+		jsonResponse = {
+		'user_name': 'server',
+		'message': 'card played'
+		}
+
+	socketio.emit('MessageResponse', jsonResponse,  room=jsonData['roomID'])
 
 
-	socketio.emit('ActionResponse', jsonData, callback=messageReceived, room=jsonData['roomID'])
 
 
 
 @socketio.on('userAction')
 def userAction(jsonData, methods=['GET', 'POST']):
-	print ("\n\n\n")
-	print (jsonData)
-	print ("\n\n\n")
-	StartGame(jsonData['roomID'])
+	
+	if jsonData['action'] == 'VoteToStart':
+		print (jsonData['action'])
+		rooms[jsonData['roomID']].startGame(jsonData['roomID'], jsonData['userID'])
+	else:
+		print ('INVALID ACTION')
 
 ########################################################################################################################
 
-
-def StartGame(room):
-	if room in rooms:
-		print (rooms[room])
 
 
 
@@ -265,7 +290,9 @@ def StartGame(room):
 
 def sanitiseInput(input):
 	if input:
-		output = re.sub(r'[^\w\s]', '', input)
+		output = escape(input)
+		#output = (input.replace('script', 'scriρt')).replace('onload', 'onløad')
+		#output = re.sub(r'[^\w\s]', '', input)
 		return output
 	else:
 		return input
@@ -274,7 +301,7 @@ def sanitiseInput(input):
 
 def generateID(val):
 	import random
-	return ("{:06x}".format(random.randint(0, val)))
+	return str(random.randint(0, val))
 
 
 def listRooms():
@@ -288,11 +315,12 @@ def listRooms():
 class game_room:
 	def __init__(self, roomName):
 		self.roomName = roomName
-		self.roomID = generateID(0xFFFFFFFF)
+		self.roomID = hex(int(generateID(0xFFFFFFFF)))[2:]
 		self.activeRoomUsers = {}
 		self.allactiveRoomUsers = {}
 		self.activeGame = False
 		self.AddToActiveRooms()
+		self.voteToStart = []
 
 	def AddToActiveRooms(self):
 		rooms.update({self.roomID: self})
@@ -301,16 +329,58 @@ class game_room:
 		del rooms[self.roomID]
 
 	def AddUserToRoom(self, userID):
-		self.activeRoomUsers.append(userID)
+		self.activeRoomUsers(userID)
 
 	def RemoveActiveUserFromRoom(self, userID):
 		del self.activeRoomUsers[userID]
+
+	def startGame(self, room, userID):
+		self.voteToStart.append(userID)
+
+		if (len(self.activeRoomUsers)) <2:
+			socketio.emit('MessageResponse', {'user_name': 'Server', 'message': '<b><i>Not enough users to start game</i></b>'}, room=self.roomID)
+			if debug:
+				socketio.emit('MessageResponse', {'user_name': 'Server', 'message': '<b><i>debug enabled, starting game.</i></b>'}, room=self.roomID)
+			else:
+				return
+		if set(self.voteToStart) == set(self.activeRoomUsers.keys()):
+			print ('ALL USERS READY TO START yeet')
+			self.activeGame = True
+			socketio.emit('startGame', room=self.roomID)
+			self.allactiveRoomUsers.update(self.activeRoomUsers)
+			self.cardList = {}
+			self.ocelotManager = OcelotManager.gameBackend(list(self.allactiveRoomUsers.keys()))
+
+			cards = self.ocelotManager.listCards()
+			for i in cards:
+				print (cards[i])
+				self.cardList[cards[i]['id']] = {'name': i , 'params': cards[i]['id']}
+
+
+			print (self.cardList)
+			self.dumpAndSend()
+
+
+
+
+	def dumpAndSend(self):
+		ocelotDump = (self.ocelotManager.dumpState())
+		for player in ocelotDump['players']:
+			hand = ""
+			print((ocelotDump['players'][player]['hand']))
+			for i in (ocelotDump['players'][player]['hand']):
+					hand = hand + self.cardList[i]['name'] + "! "
+			socketio.emit('MessageResponse', {'user_name': 'Server', 'message': ('Your hand is ' + hand )}, room=self.allactiveRoomUsers[str(player)])
+
+
 
 
 #####
 GetRid = game_room('lukshans room')
 #####
-
+def reloadSocketPages():
+	time.sleep(3)
+	socketio.emit('ReloadPage')
 
 @app.route('/enablepoll')
 def enablePoll():
@@ -322,9 +392,10 @@ def enablePoll():
 		abort()
 
 
-
 if __name__ == '__main__':
-	debug = False
+	debug = True
 	Thread(target = checkAliveCycle, args =(debug,) ).start()
+	Thread(target = reloadSocketPages ).start()
 	app = socketio.run(app, debug=debug, host='0.0.0.0')
+
 	#socketio.run(app, debug=True)
